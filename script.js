@@ -61,9 +61,13 @@ function formatDisplayDate(dateValue) {
   return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
 }
 
-function isValidVietnamPhone(phone) {
-  const normalized = String(phone || "").trim();
-  return /^(0)(3|5|7|8|9)\d{8}$/.test(normalized);
+function isValidMxlMuleLink(link) {
+  const normalized = String(link || "").trim();
+
+  return (
+    normalized.startsWith("https://median-xl.com/char/") ||
+    normalized.startsWith("https://median-xl.com/acc/")
+  );
 }
 
 function createMuleRowHtml(disabled = false) {
@@ -512,7 +516,7 @@ haveForm.addEventListener("submit", async function (event) {
     return;
   }
 
-  const hasInvalidRow = muleEntries.some(
+    const hasInvalidRow = muleEntries.some(
     (entry) => !entry.muleLink || !entry.haveType
   );
 
@@ -522,6 +526,18 @@ haveForm.addEventListener("submit", async function (event) {
     submitButton.textContent = "Gửi thông tin có đồ";
     return;
   }
+
+  const hasInvalidMxlLink = muleEntries.some(
+    (entry) => !isValidMxlMuleLink(entry.muleLink)
+  );
+
+  if (hasInvalidMxlLink) {
+    alert('Đường link không phải Link mule chứa đồ của MXL. Link hợp lệ phải bắt đầu bằng "https://median-xl.com/char/" hoặc "https://median-xl.com/acc/".');
+    submitButton.disabled = false;
+    submitButton.textContent = "Gửi thông tin có đồ";
+    return;
+  }
+
 
   try {
     const payload = {
