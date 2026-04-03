@@ -277,6 +277,13 @@ td {
   text-decoration: underline;
 }
 
+.phone-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
 .phone-link {
   color: #ffd28b;
   text-decoration: none;
@@ -284,6 +291,23 @@ td {
 
 .phone-link:hover {
   text-decoration: underline;
+}
+
+.copy-phone-btn {
+  display: none;
+  border: 1px solid rgba(255, 210, 139, 0.35);
+  background: rgba(255, 210, 139, 0.08);
+  color: #ffd28b;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+.copy-phone-btn:hover {
+  opacity: 0.95;
+  transform: translateY(-1px);
 }
 
 .pagination {
@@ -349,6 +373,14 @@ td a.link-mule {
 .mule-row-action {
   display: flex;
   align-items: end;
+}
+
+@media (min-width: 901px) {
+  .copy-phone-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
 }
 
 @media (max-width: 900px) {
