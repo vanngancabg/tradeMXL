@@ -27,12 +27,17 @@ function formatDisplayDate(dateValue) {
   const day = String(date.getDate()).padStart(2, "0");
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const year = date.getFullYear();
-
   const hours = String(date.getHours()).padStart(2, "0");
   const minutes = String(date.getMinutes()).padStart(2, "0");
   const seconds = String(date.getSeconds()).padStart(2, "0");
 
   return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
+}
+
+function getSelectedHaveType() {
+  const select = document.getElementById("haveType");
+  if (!select) return "";
+  return (select.value || "").trim();
 }
 
 async function getData(action) {
@@ -206,7 +211,7 @@ haveForm.addEventListener("submit", async function (event) {
   const name = document.getElementById("haveName").value.trim();
   const phone = document.getElementById("havePhone").value.trim();
   const muleLink = document.getElementById("muleLink").value.trim();
-  const haveType = document.getElementById("haveType").value.trim();
+  const haveType = getSelectedHaveType();
 
   if (!phone || !muleLink || !haveType) {
     alert("Vui lòng nhập đầy đủ thông tin ở mục có đồ.");
@@ -216,14 +221,18 @@ haveForm.addEventListener("submit", async function (event) {
   }
 
   try {
+    const payload = {
+      name,
+      phone,
+      muleLink,
+      haveType
+    };
+
+    console.log("Payload gửi lên Apps Script:", payload);
+
     const result = await postData({
       action: "addHaveItem",
-      payload: {
-        name,
-        phone,
-        muleLink,
-        haveType
-      }
+      payload
     });
 
     if (!result.success) {
