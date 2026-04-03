@@ -71,7 +71,8 @@ function isValidMxlMuleLink(link) {
 
   return (
     normalized.startsWith("https://median-xl.com/char/") ||
-    normalized.startsWith("https://median-xl.com/acc/")
+    normalized.startsWith("https://median-xl.com/acc/") ||
+    normalized.startsWith("https://tsw.vn.cz/char/")
   );
 }
 
@@ -537,12 +538,11 @@ haveForm.addEventListener("submit", async function (event) {
   );
 
   if (hasInvalidMxlLink) {
-    alert('Đường link không phải Link mule chứa đồ của MXL. Link hợp lệ phải bắt đầu bằng "https://median-xl.com/char/" hoặc "https://median-xl.com/acc/".');
+    alert('Đường link không phải Link mule chứa đồ hợp lệ. Link hợp lệ phải bắt đầu bằng "https://median-xl.com/char/" hoặc "https://median-xl.com/acc/" hoặc "https://tsw.vn.cz/char".');
     submitButton.disabled = false;
     submitButton.textContent = "Gửi thông tin có đồ";
     return;
   }
-
 
   try {
     const payload = {
