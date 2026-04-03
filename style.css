@@ -139,12 +139,8 @@ input::placeholder {
   color: #8f8a80;
 }
 
+input:focus,
 select:focus {
-  border-color: #f0b35d;
-  box-shadow: 0 0 0 3px rgba(240, 179, 93, 0.16);
-}
-
-input:focus {
   border-color: #f0b35d;
   box-shadow: 0 0 0 3px rgba(240, 179, 93, 0.16);
 }
@@ -178,7 +174,7 @@ input:focus {
 table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 760px;
+  min-width: 820px;
 }
 
 thead {
