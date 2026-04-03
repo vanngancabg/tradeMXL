@@ -191,10 +191,28 @@ select:focus {
 }
 
 .btn-remove-row:disabled,
-.pagination-btn:disabled {
+.pagination-btn:disabled,
+.btn-primary:disabled,
+.btn-secondary:disabled {
   opacity: 0.5;
   cursor: not-allowed;
   transform: none;
+}
+
+.cooldown-note {
+  display: none;
+  margin-top: 6px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(127, 29, 29, 0.18);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  color: #ffd6d6;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.cooldown-note.is-active {
+  display: block;
 }
 
 .table-panel {
