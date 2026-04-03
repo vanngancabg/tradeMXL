@@ -9,6 +9,12 @@ const haveTableBody = document.getElementById("haveTableBody");
 const muleRowsContainer = document.getElementById("muleRowsContainer");
 const addMuleRowBtn = document.getElementById("addMuleRowBtn");
 
+const needSearchInput = document.getElementById("needSearchInput");
+const haveTypeFilter = document.getElementById("haveTypeFilter");
+
+let needListCache = [];
+let haveListCache = [];
+
 function escapeHtml(text) {
   return String(text || "")
     .replace(/&/g, "&amp;")
@@ -96,6 +102,91 @@ function collectMuleEntries() {
     .filter((entry) => entry.muleLink || entry.haveType);
 }
 
+function getFilteredNeedList() {
+  const keyword = (needSearchInput?.value || "").trim().toLowerCase();
+
+  if (!keyword) {
+    return needListCache;
+  }
+
+  return needListCache.filter((item) =>
+    String(item.itemName || "").toLowerCase().includes(keyword)
+  );
+}
+
+function getFilteredHaveList() {
+  const selectedType = (haveTypeFilter?.value || "").trim();
+
+  if (!selectedType) {
+    return haveListCache;
+  }
+
+  return haveListCache.filter(
+    (item) => String(item.haveType || "").trim() === selectedType
+  );
+}
+
+function renderNeedTableRows() {
+  const filteredList = getFilteredNeedList();
+
+  if (!filteredList.length) {
+    needTableBody.innerHTML = `
+      <tr>
+        <td colspan="5" class="empty-row">Không có dữ liệu phù hợp với từ khóa tìm kiếm.</td>
+      </tr>
+    `;
+    return;
+  }
+
+  needTableBody.innerHTML = filteredList
+    .map((item, index) => `
+      <tr>
+        <td>${index + 1}</td>
+        <td>${escapeHtml(formatDisplayDate(item.time))}</td>
+        <td>${escapeHtml(item.itemName)}</td>
+        <td>${escapeHtml(item.name)}</td>
+        <td>${escapeHtml(item.phone)}</td>
+      </tr>
+    `)
+    .join("");
+}
+
+function renderHaveTableRows() {
+  const filteredList = getFilteredHaveList();
+
+  if (!filteredList.length) {
+    haveTableBody.innerHTML = `
+      <tr>
+        <td colspan="6" class="empty-row">Không có dữ liệu phù hợp với bộ lọc loại Mule.</td>
+      </tr>
+    `;
+    return;
+  }
+
+  haveTableBody.innerHTML = filteredList
+    .map((item, index) => {
+      const displayName = item.name && item.name.trim() ? item.name : "Không ghi tên";
+      const displayType = item.haveType && item.haveType.trim() ? item.haveType : "Khác";
+      const displayLink = item.muleLink || "";
+
+      return `
+        <tr>
+          <td>${index + 1}</td>
+          <td>${escapeHtml(formatDisplayDate(item.time))}</td>
+          <td>
+            <a class="link-mule" href="${escapeHtml(displayLink)}" target="_blank" rel="noopener noreferrer">
+              ${escapeHtml(displayLink)}
+            </a>
+          </td>
+          <td>${escapeHtml(displayType)}</td>
+          <td>${escapeHtml(displayName)}</td>
+          <td>${escapeHtml(item.phone)}</td>
+        </tr>
+      `;
+    })
+    .join("");
+}
+
 addMuleRowBtn.addEventListener("click", addMuleRow);
 
 muleRowsContainer.addEventListener("click", function (event) {
@@ -110,6 +201,9 @@ muleRowsContainer.addEventListener("click", function (event) {
     updateRemoveButtonsState();
   }
 });
+
+needSearchInput?.addEventListener("input", renderNeedTableRows);
+haveTypeFilter?.addEventListener("change", renderHaveTableRows);
 
 async function getData(action) {
   const url = `${APPS_SCRIPT_URL}?action=${encodeURIComponent(action)}`;
@@ -132,35 +226,24 @@ async function postData(bodyData) {
 async function renderNeedTable() {
   needTableBody.innerHTML = `
     <tr>
-      <td colspan="6" class="empty-row">Đang tải dữ liệu...</td>
+      <td colspan="5" class="empty-row">Đang tải dữ liệu...</td>
     </tr>
   `;
 
   try {
     const result = await getData("getNeedList");
-    const needList = result.data || [];
+    needListCache = result.data || [];
 
-    if (!needList.length) {
+    if (!needListCache.length) {
       needTableBody.innerHTML = `
         <tr>
-          <td colspan="6" class="empty-row">Chưa có dữ liệu cần đồ.</td>
+          <td colspan="5" class="empty-row">Chưa có dữ liệu cần đồ.</td>
         </tr>
       `;
       return;
     }
 
-    needTableBody.innerHTML = needList
-      .map((item, index) => `
-        <tr>
-          <td>${index + 1}</td>
-          <td>${escapeHtml(formatDisplayDate(item.time))}</td>
-          <td>${escapeHtml(item.itemName)}</td>
-          <td>${escapeHtml(item.name)}</td>
-          <td>${escapeHtml(item.phone)}</td>
-          
-        </tr>
-      `)
-      .join("");
+    renderNeedTableRows();
   } catch (error) {
     needTableBody.innerHTML = `
       <tr>
@@ -174,54 +257,31 @@ async function renderNeedTable() {
 async function renderHaveTable() {
   haveTableBody.innerHTML = `
     <tr>
-      <td colspan="7" class="empty-row">Đang tải dữ liệu...</td>
+      <td colspan="6" class="empty-row">Đang tải dữ liệu...</td>
     </tr>
   `;
 
   try {
     const result = await getData("getHaveList");
-    const haveList = result.data || [];
+    haveListCache = result.data || [];
 
-    if (!haveList.length) {
+    if (!haveListCache.length) {
       haveTableBody.innerHTML = `
         <tr>
-          <td colspan="7" class="empty-row">Chưa có dữ liệu có đồ.</td>
+          <td colspan="6" class="empty-row">Chưa có dữ liệu có đồ.</td>
         </tr>
       `;
       return;
     }
 
-    haveTableBody.innerHTML = haveList
-      .map((item, index) => {
-        const displayName = item.name && item.name.trim() ? item.name : "Không ghi tên";
-        const displayType = item.haveType && item.haveType.trim() ? item.haveType : "Khác";
-        const displayLink = item.muleLink || "";
-
-        return `
-          <tr>
-            <td>${index + 1}</td>
-            <td>${escapeHtml(formatDisplayDate(item.time))}</td>
-            <td>
-              <a class="link-mule" href="${escapeHtml(displayLink)}" target="_blank" rel="noopener noreferrer">
-                ${escapeHtml(displayLink)}
-              </a>
-            </td>
-            <td>${escapeHtml(displayType)}</td>
-            <td>${escapeHtml(displayName)}</td>
-            <td>${escapeHtml(item.phone)}</td>
-            
-          </tr>
-        `;
-      })
-      .join("");
-    } catch (error) {
+    renderHaveTableRows();
+  } catch (error) {
     haveTableBody.innerHTML = `
       <tr>
         <td colspan="6" class="empty-row">Không tải được dữ liệu có đồ.</td>
       </tr>
     `;
     console.error("Lỗi renderHaveTable:", error);
-    alert("Lỗi tải danh sách có đồ: " + error.message);
   }
 }
 
@@ -323,7 +383,7 @@ haveForm.addEventListener("submit", async function (event) {
     resetMuleRows();
     await renderHaveTable();
     alert("Đã gửi thông tin có đồ thành công.");
-    } catch (error) {
+  } catch (error) {
     console.error("Lỗi gửi haveForm:", error);
     alert("Gửi dữ liệu thất bại ở mục có đồ: " + error.message);
   } finally {
@@ -331,48 +391,6 @@ haveForm.addEventListener("submit", async function (event) {
     submitButton.textContent = "Gửi thông tin có đồ";
   }
 });
-
-async function deleteNeedItem(id) {
-  const confirmDelete = confirm("Bạn có chắc muốn xóa dòng này không?");
-  if (!confirmDelete) return;
-
-  try {
-    const result = await postData({
-      action: "deleteNeedItem",
-      id
-    });
-
-    if (!result.success) {
-      throw new Error(result.message || "Không thể xóa dữ liệu");
-    }
-
-    await renderNeedTable();
-  } catch (error) {
-    console.error("Lỗi xóa need item:", error);
-    alert("Xóa dữ liệu thất bại.");
-  }
-}
-
-async function deleteHaveItem(id) {
-  const confirmDelete = confirm("Bạn có chắc muốn xóa dòng này không?");
-  if (!confirmDelete) return;
-
-  try {
-    const result = await postData({
-      action: "deleteHaveItem",
-      id
-    });
-
-    if (!result.success) {
-      throw new Error(result.message || "Không thể xóa dữ liệu");
-    }
-
-    await renderHaveTable();
-  } catch (error) {
-    console.error("Lỗi xóa have item:", error);
-    alert("Xóa dữ liệu thất bại.");
-  }
-}
 
 updateRemoveButtonsState();
 renderNeedTable();
