@@ -242,15 +242,6 @@ td {
   text-decoration: underline;
 }
 
-.btn-delete {
-  border: none;
-  border-radius: 10px;
-  padding: 8px 12px;
-  background: #7f1d1d;
-  color: #fff;
-  cursor: pointer;
-  font-size: 13px;
-}
 
 .btn-delete:hover {
   opacity: 0.9;
