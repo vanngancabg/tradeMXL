@@ -15,6 +15,26 @@ function escapeHtml(text) {
     .replace(/'/g, "&#039;");
 }
 
+function formatDisplayDate(dateValue) {
+  if (!dateValue) return "";
+
+  const date = new Date(dateValue);
+
+  if (isNaN(date.getTime())) {
+    return String(dateValue);
+  }
+
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const year = date.getFullYear();
+
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+  const seconds = String(date.getSeconds()).padStart(2, "0");
+
+  return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
+}
+
 async function getData(action) {
   const url = `${APPS_SCRIPT_URL}?action=${encodeURIComponent(action)}`;
   const response = await fetch(url);
@@ -57,7 +77,7 @@ async function renderNeedTable() {
       .map((item, index) => `
         <tr>
           <td>${index + 1}</td>
-          <td>${escapeHtml(item.time)}</td>
+          <td>${escapeHtml(formatDisplayDate(item.time))}</td>
           <td>${escapeHtml(item.itemName)}</td>
           <td>${escapeHtml(item.name)}</td>
           <td>${escapeHtml(item.phone)}</td>
@@ -106,7 +126,7 @@ async function renderHaveTable() {
         return `
           <tr>
             <td>${index + 1}</td>
-            <td>${escapeHtml(item.time)}</td>
+            <td>${escapeHtml(formatDisplayDate(item.time))}</td>
             <td>
               <a class="link-mule" href="${escapeHtml(displayLink)}" target="_blank" rel="noopener noreferrer">
                 ${escapeHtml(displayLink)}
