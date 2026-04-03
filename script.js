@@ -1,5 +1,8 @@
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzSK9fFi4o6RVG89DJe6TpE1w8XCRUc6wfj8poC2alAuPZ23uOx7dPNVqXWkqqJ47Y4ZQ/exec";
 
+const NEED_ITEMS_PER_PAGE = 10;
+const HAVE_ITEMS_PER_PAGE = 15;
+
 const needForm = document.getElementById("needForm");
 const haveForm = document.getElementById("haveForm");
 
@@ -12,8 +15,23 @@ const addMuleRowBtn = document.getElementById("addMuleRowBtn");
 const needSearchInput = document.getElementById("needSearchInput");
 const haveTypeFilter = document.getElementById("haveTypeFilter");
 
+const needFirstBtn = document.getElementById("needFirstBtn");
+const needPrevBtn = document.getElementById("needPrevBtn");
+const needNextBtn = document.getElementById("needNextBtn");
+const needLastBtn = document.getElementById("needLastBtn");
+const needPageInfo = document.getElementById("needPageInfo");
+
+const haveFirstBtn = document.getElementById("haveFirstBtn");
+const havePrevBtn = document.getElementById("havePrevBtn");
+const haveNextBtn = document.getElementById("haveNextBtn");
+const haveLastBtn = document.getElementById("haveLastBtn");
+const havePageInfo = document.getElementById("havePageInfo");
+
 let needListCache = [];
 let haveListCache = [];
+
+let currentNeedPage = 1;
+let currentHavePage = 1;
 
 function escapeHtml(text) {
   return String(text || "")
@@ -126,8 +144,44 @@ function getFilteredHaveList() {
   );
 }
 
+function paginateList(list, currentPage, itemsPerPage) {
+  const totalItems = list.length;
+  const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
+  const safePage = Math.min(Math.max(currentPage, 1), totalPages);
+  const startIndex = (safePage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+
+  return {
+    pageItems: list.slice(startIndex, endIndex),
+    totalPages,
+    currentPage: safePage
+  };
+}
+
+function updateNeedPagination(totalPages, currentPage) {
+  needPageInfo.textContent = `Trang ${currentPage} / ${totalPages}`;
+
+  needFirstBtn.disabled = currentPage === 1;
+  needPrevBtn.disabled = currentPage === 1;
+  needNextBtn.disabled = currentPage === totalPages;
+  needLastBtn.disabled = currentPage === totalPages;
+}
+
+function updateHavePagination(totalPages, currentPage) {
+  havePageInfo.textContent = `Trang ${currentPage} / ${totalPages}`;
+
+  haveFirstBtn.disabled = currentPage === 1;
+  havePrevBtn.disabled = currentPage === 1;
+  haveNextBtn.disabled = currentPage === totalPages;
+  haveLastBtn.disabled = currentPage === totalPages;
+}
+
 function renderNeedTableRows() {
   const filteredList = getFilteredNeedList();
+  const pagination = paginateList(filteredList, currentNeedPage, NEED_ITEMS_PER_PAGE);
+
+  currentNeedPage = pagination.currentPage;
+  updateNeedPagination(pagination.totalPages, pagination.currentPage);
 
   if (!filteredList.length) {
     needTableBody.innerHTML = `
@@ -138,10 +192,12 @@ function renderNeedTableRows() {
     return;
   }
 
-  needTableBody.innerHTML = filteredList
+  const startNumber = (pagination.currentPage - 1) * NEED_ITEMS_PER_PAGE;
+
+  needTableBody.innerHTML = pagination.pageItems
     .map((item, index) => `
       <tr>
-        <td>${index + 1}</td>
+        <td>${startNumber + index + 1}</td>
         <td>${escapeHtml(formatDisplayDate(item.time))}</td>
         <td>${escapeHtml(item.itemName)}</td>
         <td>${escapeHtml(item.name)}</td>
@@ -153,6 +209,10 @@ function renderNeedTableRows() {
 
 function renderHaveTableRows() {
   const filteredList = getFilteredHaveList();
+  const pagination = paginateList(filteredList, currentHavePage, HAVE_ITEMS_PER_PAGE);
+
+  currentHavePage = pagination.currentPage;
+  updateHavePagination(pagination.totalPages, pagination.currentPage);
 
   if (!filteredList.length) {
     haveTableBody.innerHTML = `
@@ -163,7 +223,9 @@ function renderHaveTableRows() {
     return;
   }
 
-  haveTableBody.innerHTML = filteredList
+  const startNumber = (pagination.currentPage - 1) * HAVE_ITEMS_PER_PAGE;
+
+  haveTableBody.innerHTML = pagination.pageItems
     .map((item, index) => {
       const displayName = item.name && item.name.trim() ? item.name : "Không ghi tên";
       const displayType = item.haveType && item.haveType.trim() ? item.haveType : "Khác";
@@ -171,7 +233,7 @@ function renderHaveTableRows() {
 
       return `
         <tr>
-          <td>${index + 1}</td>
+          <td>${startNumber + index + 1}</td>
           <td>${escapeHtml(formatDisplayDate(item.time))}</td>
           <td>
             <a class="link-mule" href="${escapeHtml(displayLink)}" target="_blank" rel="noopener noreferrer">
@@ -202,8 +264,57 @@ muleRowsContainer.addEventListener("click", function (event) {
   }
 });
 
-needSearchInput?.addEventListener("input", renderNeedTableRows);
-haveTypeFilter?.addEventListener("change", renderHaveTableRows);
+needSearchInput?.addEventListener("input", function () {
+  currentNeedPage = 1;
+  renderNeedTableRows();
+});
+
+haveTypeFilter?.addEventListener("change", function () {
+  currentHavePage = 1;
+  renderHaveTableRows();
+});
+
+needFirstBtn?.addEventListener("click", function () {
+  currentNeedPage = 1;
+  renderNeedTableRows();
+});
+
+needPrevBtn?.addEventListener("click", function () {
+  currentNeedPage = Math.max(1, currentNeedPage - 1);
+  renderNeedTableRows();
+});
+
+needNextBtn?.addEventListener("click", function () {
+  currentNeedPage += 1;
+  renderNeedTableRows();
+});
+
+needLastBtn?.addEventListener("click", function () {
+  const totalPages = Math.max(1, Math.ceil(getFilteredNeedList().length / NEED_ITEMS_PER_PAGE));
+  currentNeedPage = totalPages;
+  renderNeedTableRows();
+});
+
+haveFirstBtn?.addEventListener("click", function () {
+  currentHavePage = 1;
+  renderHaveTableRows();
+});
+
+havePrevBtn?.addEventListener("click", function () {
+  currentHavePage = Math.max(1, currentHavePage - 1);
+  renderHaveTableRows();
+});
+
+haveNextBtn?.addEventListener("click", function () {
+  currentHavePage += 1;
+  renderHaveTableRows();
+});
+
+haveLastBtn?.addEventListener("click", function () {
+  const totalPages = Math.max(1, Math.ceil(getFilteredHaveList().length / HAVE_ITEMS_PER_PAGE));
+  currentHavePage = totalPages;
+  renderHaveTableRows();
+});
 
 async function getData(action) {
   const url = `${APPS_SCRIPT_URL}?action=${encodeURIComponent(action)}`;
@@ -233,6 +344,7 @@ async function renderNeedTable() {
   try {
     const result = await getData("getNeedList");
     needListCache = result.data || [];
+    currentNeedPage = 1;
 
     if (!needListCache.length) {
       needTableBody.innerHTML = `
@@ -240,6 +352,7 @@ async function renderNeedTable() {
           <td colspan="5" class="empty-row">Chưa có dữ liệu cần đồ.</td>
         </tr>
       `;
+      updateNeedPagination(1, 1);
       return;
     }
 
@@ -251,6 +364,7 @@ async function renderNeedTable() {
       </tr>
     `;
     console.error("Lỗi renderNeedTable:", error);
+    updateNeedPagination(1, 1);
   }
 }
 
@@ -264,6 +378,7 @@ async function renderHaveTable() {
   try {
     const result = await getData("getHaveList");
     haveListCache = result.data || [];
+    currentHavePage = 1;
 
     if (!haveListCache.length) {
       haveTableBody.innerHTML = `
@@ -271,6 +386,7 @@ async function renderHaveTable() {
           <td colspan="6" class="empty-row">Chưa có dữ liệu có đồ.</td>
         </tr>
       `;
+      updateHavePagination(1, 1);
       return;
     }
 
@@ -282,6 +398,7 @@ async function renderHaveTable() {
       </tr>
     `;
     console.error("Lỗi renderHaveTable:", error);
+    updateHavePagination(1, 1);
   }
 }
 
@@ -393,5 +510,7 @@ haveForm.addEventListener("submit", async function (event) {
 });
 
 updateRemoveButtonsState();
+updateNeedPagination(1, 1);
+updateHavePagination(1, 1);
 renderNeedTable();
 renderHaveTable();
