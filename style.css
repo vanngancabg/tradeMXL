@@ -277,6 +277,15 @@ td {
   text-decoration: underline;
 }
 
+.phone-link {
+  color: #7cc6ff;
+  text-decoration: none;
+}
+
+.phone-link:hover {
+  text-decoration: underline;
+}
+
 .pagination {
   display: flex;
   align-items: center;
