@@ -59,9 +59,9 @@ async function renderNeedTable() {
           <tr>
             <td>${index + 1}</td>
             <td>${escapeHtml(item.time)}</td>
+            <td>${escapeHtml(item.itemName)}</td>
             <td>${escapeHtml(item.name)}</td>
             <td>${escapeHtml(item.phone)}</td>
-            <td>${escapeHtml(item.itemName)}</td>
             <td>
               <button class="btn-delete" onclick="deleteNeedItem('${escapeHtml(item.id)}')">Xóa</button>
             </td>
@@ -82,7 +82,7 @@ async function renderNeedTable() {
 async function renderHaveTable() {
   haveTableBody.innerHTML = `
     <tr>
-      <td colspan="6" class="empty-row">Đang tải dữ liệu...</td>
+      <td colspan="7" class="empty-row">Đang tải dữ liệu...</td>
     </tr>
   `;
 
@@ -93,7 +93,7 @@ async function renderHaveTable() {
     if (haveList.length === 0) {
       haveTableBody.innerHTML = `
         <tr>
-          <td colspan="6" class="empty-row">Chưa có dữ liệu có đồ.</td>
+          <td colspan="7" class="empty-row">Chưa có dữ liệu có đồ.</td>
         </tr>
       `;
       return;
@@ -104,17 +104,21 @@ async function renderHaveTable() {
         const displayName =
           item.name && item.name.trim() !== "" ? item.name : "Không ghi tên";
 
+        const displayType =
+          item.haveType && item.haveType.trim() !== "" ? item.haveType : "Khác";
+
         return `
           <tr>
             <td>${index + 1}</td>
             <td>${escapeHtml(item.time)}</td>
-            <td>${escapeHtml(displayName)}</td>
-            <td>${escapeHtml(item.phone)}</td>
             <td>
               <a class="link-mule" href="${escapeHtml(item.muleLink)}" target="_blank" rel="noopener noreferrer">
                 ${escapeHtml(item.muleLink)}
               </a>
             </td>
+            <td>${escapeHtml(displayName)}</td>
+            <td>${escapeHtml(item.phone)}</td>
+            <td>${escapeHtml(displayType)}</td>
             <td>
               <button class="btn-delete" onclick="deleteHaveItem('${escapeHtml(item.id)}')">Xóa</button>
             </td>
@@ -125,7 +129,7 @@ async function renderHaveTable() {
   } catch (error) {
     haveTableBody.innerHTML = `
       <tr>
-        <td colspan="6" class="empty-row">Không tải được dữ liệu có đồ.</td>
+        <td colspan="7" class="empty-row">Không tải được dữ liệu có đồ.</td>
       </tr>
     `;
     console.error("Lỗi renderHaveTable:", error);
@@ -185,14 +189,43 @@ haveForm.addEventListener("submit", async function (event) {
 
   const name = document.getElementById("haveName").value.trim();
   const phone = document.getElementById("havePhone").value.trim();
+  const haveType = document.getElementById("haveType").value.trim();
   const muleLink = document.getElementById("muleLink").value.trim();
 
-  if (!phone || !muleLink) {
+  if (!phone || !haveType || !muleLink) {
     alert("Vui lòng nhập đầy đủ thông tin ở mục có đồ.");
     submitButton.disabled = false;
     submitButton.textContent = "Gửi thông tin có đồ";
     return;
   }
+
+  try {
+    const result = await postData({
+      action: "addHaveItem",
+      payload: {
+        name,
+        phone,
+        haveType,
+        muleLink
+      }
+    });
+
+    if (!result.success) {
+      throw new Error(result.message || "Không thể gửi dữ liệu");
+    }
+
+    haveForm.reset();
+    await renderHaveTable();
+    alert("Đã gửi thông tin có đồ thành công.");
+  } catch (error) {
+    console.error("Lỗi gửi haveForm:", error);
+    alert("Gửi dữ liệu thất bại. Bạn kiểm tra lại Web App URL hoặc quyền triển khai Apps Script.");
+  } finally {
+    submitButton.disabled = false;
+    submitButton.textContent = "Gửi thông tin có đồ";
+  }
+});
+
 
   try {
     const result = await postData({
