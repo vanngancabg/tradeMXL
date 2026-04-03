@@ -1,4 +1,4 @@
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzSK9fFi4o6RVG89DJe6TpE1w8XCRUc6wfj8poC2alAuPZ23uOx7dPNVqXWkqqJ47Y4ZQ/exec";
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw--ABnLBy2LRV1Emh2codqNxNXwuivDzniSNSplLhMhXrGf1tx7Xpuax4A97_-OYc1/exec";
 
 const needForm = document.getElementById("needForm");
 const haveForm = document.getElementById("haveForm");
@@ -218,13 +218,14 @@ async function renderHaveTable() {
         `;
       })
       .join("");
-  } catch (error) {
+    } catch (error) {
     haveTableBody.innerHTML = `
       <tr>
         <td colspan="7" class="empty-row">Không tải được dữ liệu có đồ.</td>
       </tr>
     `;
     console.error("Lỗi renderHaveTable:", error);
+    alert("Lỗi tải danh sách có đồ: " + error.message);
   }
 }
 
@@ -326,9 +327,9 @@ haveForm.addEventListener("submit", async function (event) {
     resetMuleRows();
     await renderHaveTable();
     alert("Đã gửi thông tin có đồ thành công.");
-  } catch (error) {
+    } catch (error) {
     console.error("Lỗi gửi haveForm:", error);
-    alert("Gửi dữ liệu thất bại ở mục có đồ.");
+    alert("Gửi dữ liệu thất bại ở mục có đồ: " + error.message);
   } finally {
     submitButton.disabled = false;
     submitButton.textContent = "Gửi thông tin có đồ";
