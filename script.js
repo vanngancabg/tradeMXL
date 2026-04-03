@@ -61,6 +61,11 @@ function formatDisplayDate(dateValue) {
   return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
 }
 
+function isValidVietnamPhone(phone) {
+  const normalized = String(phone || "").trim();
+  return /^(0)(3|5|7|8|9)\d{8}$/.test(normalized);
+}
+
 function createMuleRowHtml(disabled = false) {
   return `
     <div class="mule-row">
@@ -107,17 +112,17 @@ function resetMuleRows() {
   updateRemoveButtonsState();
 }
 
+function getMuleRows() {
+  return Array.from(muleRowsContainer.querySelectorAll(".mule-row"));
+}
+
 function collectMuleEntries() {
-  const rows = muleRowsContainer.querySelectorAll(".mule-row");
+  return getMuleRows().map((row) => {
+    const muleLink = row.querySelector(".mule-link-input")?.value.trim() || "";
+    const haveType = row.querySelector(".have-type-select")?.value.trim() || "";
 
-  return Array.from(rows)
-    .map((row) => {
-      const muleLink = row.querySelector(".mule-link-input")?.value.trim() || "";
-      const haveType = row.querySelector(".have-type-select")?.value.trim() || "";
-
-      return { muleLink, haveType };
-    })
-    .filter((entry) => entry.muleLink || entry.haveType);
+    return { muleLink, haveType };
+  });
 }
 
 function getFilteredNeedList() {
@@ -200,7 +205,7 @@ function renderNeedTableRows() {
         <td>${startNumber + index + 1}</td>
         <td>${escapeHtml(formatDisplayDate(item.time))}</td>
         <td>${escapeHtml(item.itemName)}</td>
-        <td>${escapeHtml(item.name)}</td>
+        <td>${escapeHtml(item.name || "Ẩn danh")}</td>
         <td>${escapeHtml(item.phone)}</td>
       </tr>
     `)
@@ -343,7 +348,10 @@ async function renderNeedTable() {
 
   try {
     const result = await getData("getNeedList");
-    needListCache = result.data || [];
+    needListCache = (result.data || []).map((item) => ({
+      ...item,
+      name: item.name && String(item.name).trim() ? item.name : "Ẩn danh"
+    }));
     currentNeedPage = 1;
 
     if (!needListCache.length) {
@@ -409,12 +417,27 @@ needForm.addEventListener("submit", async function (event) {
   submitButton.disabled = true;
   submitButton.textContent = "Đang gửi...";
 
-  const name = document.getElementById("needName").value.trim();
+  const rawName = document.getElementById("needName").value.trim();
+  const name = rawName || "Ẩn danh";
   const phone = document.getElementById("needPhone").value.trim();
   const itemName = document.getElementById("needItem").value.trim();
 
-  if (!name || !phone || !itemName) {
-    alert("Vui lòng nhập đầy đủ thông tin ở mục cần đồ.");
+  if (!phone) {
+    alert("Bạn chưa nhập Số điện thoại Zalo ở mục cần đồ.");
+    submitButton.disabled = false;
+    submitButton.textContent = "Gửi thông tin cần đồ";
+    return;
+  }
+
+  if (!isValidVietnamPhone(phone)) {
+    alert("Số điện thoại Zalo ở mục cần đồ phải là số điện thoại hợp lệ của Việt Nam.");
+    submitButton.disabled = false;
+    submitButton.textContent = "Gửi thông tin cần đồ";
+    return;
+  }
+
+  if (!itemName) {
+    alert("Bạn chưa nhập Tên đồ cần.");
     submitButton.disabled = false;
     submitButton.textContent = "Gửi thông tin cần đồ";
     return;
@@ -458,23 +481,43 @@ haveForm.addEventListener("submit", async function (event) {
   const muleEntries = collectMuleEntries();
 
   if (!phone) {
-    alert("Vui lòng nhập số điện thoại Zalo ở mục có đồ.");
+    alert("Bạn chưa nhập Số điện thoại Zalo ở mục có đồ.");
+    submitButton.disabled = false;
+    submitButton.textContent = "Gửi thông tin có đồ";
+    return;
+  }
+
+  if (!isValidVietnamPhone(phone)) {
+    alert("Số điện thoại Zalo ở mục có đồ phải là số điện thoại hợp lệ của Việt Nam.");
     submitButton.disabled = false;
     submitButton.textContent = "Gửi thông tin có đồ";
     return;
   }
 
   if (!muleEntries.length) {
-    alert("Vui lòng nhập ít nhất 1 Link Mule.");
+    alert("Bạn phải nhập ít nhất 1 dòng gồm Link Mule và Loại Mule.");
     submitButton.disabled = false;
     submitButton.textContent = "Gửi thông tin có đồ";
     return;
   }
 
-  const hasInvalidRow = muleEntries.some((entry) => !entry.muleLink || !entry.haveType);
+  const hasCompletelyEmptyRows = muleEntries.some(
+    (entry) => !entry.muleLink && !entry.haveType
+  );
+
+  if (hasCompletelyEmptyRows) {
+    alert("Có dòng Mule đang để trống. Bạn hãy điền đầy đủ hoặc xóa dòng đó đi.");
+    submitButton.disabled = false;
+    submitButton.textContent = "Gửi thông tin có đồ";
+    return;
+  }
+
+  const hasInvalidRow = muleEntries.some(
+    (entry) => !entry.muleLink || !entry.haveType
+  );
 
   if (hasInvalidRow) {
-    alert("Mỗi dòng Mule phải nhập đầy đủ Link Mule và Loại Mule.");
+    alert("Mỗi dòng Mule phải điền đầy đủ Link Mule và Loại Mule, hoặc xóa dòng đó đi.");
     submitButton.disabled = false;
     submitButton.textContent = "Gửi thông tin có đồ";
     return;
