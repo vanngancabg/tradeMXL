@@ -157,16 +157,14 @@ async function renderNeedTable() {
           <td>${escapeHtml(item.itemName)}</td>
           <td>${escapeHtml(item.name)}</td>
           <td>${escapeHtml(item.phone)}</td>
-          <td>
-            <button class="btn-delete" onclick="deleteNeedItem('${escapeHtml(item.id)}')">Xóa</button>
-          </td>
+          
         </tr>
       `)
       .join("");
   } catch (error) {
     needTableBody.innerHTML = `
       <tr>
-        <td colspan="6" class="empty-row">Không tải được dữ liệu cần đồ.</td>
+        <td colspan="5" class="empty-row">Không tải được dữ liệu cần đồ.</td>
       </tr>
     `;
     console.error("Lỗi renderNeedTable:", error);
@@ -211,9 +209,7 @@ async function renderHaveTable() {
             <td>${escapeHtml(displayType)}</td>
             <td>${escapeHtml(displayName)}</td>
             <td>${escapeHtml(item.phone)}</td>
-            <td>
-              <button class="btn-delete" onclick="deleteHaveItem('${escapeHtml(item.id)}')">Xóa</button>
-            </td>
+            
           </tr>
         `;
       })
@@ -221,7 +217,7 @@ async function renderHaveTable() {
     } catch (error) {
     haveTableBody.innerHTML = `
       <tr>
-        <td colspan="7" class="empty-row">Không tải được dữ liệu có đồ.</td>
+        <td colspan="6" class="empty-row">Không tải được dữ liệu có đồ.</td>
       </tr>
     `;
     console.error("Lỗi renderHaveTable:", error);
