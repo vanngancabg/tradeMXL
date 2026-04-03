@@ -121,7 +121,8 @@ label {
   color: #ffe1b1;
 }
 
-input {
+input,
+select {
   width: 100%;
   padding: 13px 14px;
   border-radius: 12px;
@@ -134,6 +135,11 @@ input {
 
 input::placeholder {
   color: #8f8a80;
+}
+
+select:focus {
+  border-color: #f0b35d;
+  box-shadow: 0 0 0 3px rgba(240, 179, 93, 0.16);
 }
 
 input:focus {
