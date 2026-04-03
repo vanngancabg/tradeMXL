@@ -1,4 +1,4 @@
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw--ABnLBy2LRV1Emh2codqNxNXwuivDzniSNSplLhMhXrGf1tx7Xpuax4A97_-OYc1/exec";
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzSK9fFi4o6RVG89DJe6TpE1w8XCRUc6wfj8poC2alAuPZ23uOx7dPNVqXWkqqJ47Y4ZQ/exec";
 
 const needForm = document.getElementById("needForm");
 const haveForm = document.getElementById("haveForm");
