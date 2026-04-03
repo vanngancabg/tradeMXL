@@ -103,7 +103,7 @@ function normalizeLink(link) {
 
 function buildZaloLink(phone) {
   const normalizedPhone = String(phone || "").trim().replace(/\D/g, "");
-  return `zalo://${normalizedPhone}`;
+  return `https://zalo.me/${normalizedPhone}`;
 }
 
 function formatRemainingTime(ms) {
