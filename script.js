@@ -6,6 +6,9 @@ const haveForm = document.getElementById("haveForm");
 const needTableBody = document.getElementById("needTableBody");
 const haveTableBody = document.getElementById("haveTableBody");
 
+const muleRowsContainer = document.getElementById("muleRowsContainer");
+const addMuleRowBtn = document.getElementById("addMuleRowBtn");
+
 function escapeHtml(text) {
   return String(text || "")
     .replace(/&/g, "&amp;")
@@ -34,11 +37,79 @@ function formatDisplayDate(dateValue) {
   return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
 }
 
-function getSelectedHaveType() {
-  const select = document.getElementById("haveType");
-  if (!select) return "";
-  return (select.value || "").trim();
+function createMuleRowHtml(disabled = false) {
+  return `
+    <div class="mule-row">
+      <div class="form-group">
+        <label>Link Mule chứa đồ</label>
+        <input type="url" class="mule-link-input" placeholder="Dán link Mule ở đây" required />
+      </div>
+
+      <div class="form-group">
+        <label>Loại Mule</label>
+        <select class="have-type-select" required>
+          <option value="">-- Chọn loại Mule --</option>
+          <option value="Đồ set xanh">Đồ set xanh</option>
+          <option value="Đồ SU - SSU">Đồ SU - SSU</option>
+          <option value="UMO - Relic">UMO - Relic</option>
+          <option value="Charm">Charm</option>
+          <option value="Khác">Khác</option>
+        </select>
+      </div>
+
+      <div class="mule-row-action">
+        <button type="button" class="btn-remove-row" ${disabled ? "disabled" : ""}>Xóa dòng</button>
+      </div>
+    </div>
+  `;
 }
+
+function updateRemoveButtonsState() {
+  const removeButtons = muleRowsContainer.querySelectorAll(".btn-remove-row");
+  const hasOnlyOneRow = removeButtons.length === 1;
+
+  removeButtons.forEach((button) => {
+    button.disabled = hasOnlyOneRow;
+  });
+}
+
+function addMuleRow() {
+  muleRowsContainer.insertAdjacentHTML("beforeend", createMuleRowHtml(false));
+  updateRemoveButtonsState();
+}
+
+function resetMuleRows() {
+  muleRowsContainer.innerHTML = createMuleRowHtml(true);
+  updateRemoveButtonsState();
+}
+
+function collectMuleEntries() {
+  const rows = muleRowsContainer.querySelectorAll(".mule-row");
+
+  return Array.from(rows)
+    .map((row) => {
+      const muleLink = row.querySelector(".mule-link-input")?.value.trim() || "";
+      const haveType = row.querySelector(".have-type-select")?.value.trim() || "";
+
+      return { muleLink, haveType };
+    })
+    .filter((entry) => entry.muleLink || entry.haveType);
+}
+
+addMuleRowBtn.addEventListener("click", addMuleRow);
+
+muleRowsContainer.addEventListener("click", function (event) {
+  if (!event.target.classList.contains("btn-remove-row")) return;
+
+  const rows = muleRowsContainer.querySelectorAll(".mule-row");
+  if (rows.length <= 1) return;
+
+  const row = event.target.closest(".mule-row");
+  if (row) {
+    row.remove();
+    updateRemoveButtonsState();
+  }
+});
 
 async function getData(action) {
   const url = `${APPS_SCRIPT_URL}?action=${encodeURIComponent(action)}`;
@@ -210,11 +281,26 @@ haveForm.addEventListener("submit", async function (event) {
 
   const name = document.getElementById("haveName").value.trim();
   const phone = document.getElementById("havePhone").value.trim();
-  const muleLink = document.getElementById("muleLink").value.trim();
-  const haveType = getSelectedHaveType();
+  const muleEntries = collectMuleEntries();
 
-  if (!phone || !muleLink || !haveType) {
-    alert("Vui lòng nhập đầy đủ thông tin ở mục có đồ.");
+  if (!phone) {
+    alert("Vui lòng nhập số điện thoại Zalo ở mục có đồ.");
+    submitButton.disabled = false;
+    submitButton.textContent = "Gửi thông tin có đồ";
+    return;
+  }
+
+  if (!muleEntries.length) {
+    alert("Vui lòng nhập ít nhất 1 Link Mule.");
+    submitButton.disabled = false;
+    submitButton.textContent = "Gửi thông tin có đồ";
+    return;
+  }
+
+  const hasInvalidRow = muleEntries.some((entry) => !entry.muleLink || !entry.haveType);
+
+  if (hasInvalidRow) {
+    alert("Mỗi dòng Mule phải nhập đầy đủ Link Mule và Loại Mule.");
     submitButton.disabled = false;
     submitButton.textContent = "Gửi thông tin có đồ";
     return;
@@ -224,11 +310,8 @@ haveForm.addEventListener("submit", async function (event) {
     const payload = {
       name,
       phone,
-      muleLink,
-      haveType
+      entries: muleEntries
     };
-
-    console.log("Payload gửi lên Apps Script:", payload);
 
     const result = await postData({
       action: "addHaveItem",
@@ -240,6 +323,7 @@ haveForm.addEventListener("submit", async function (event) {
     }
 
     haveForm.reset();
+    resetMuleRows();
     await renderHaveTable();
     alert("Đã gửi thông tin có đồ thành công.");
   } catch (error) {
@@ -293,5 +377,6 @@ async function deleteHaveItem(id) {
   }
 }
 
+updateRemoveButtonsState();
 renderNeedTable();
 renderHaveTable();
