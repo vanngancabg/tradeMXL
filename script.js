@@ -106,6 +106,28 @@ function buildZaloLink(phone) {
   return `https://zalo.me/${normalizedPhone}`;
 }
 
+async function copyPhoneNumber(phone) {
+  const normalizedPhone = String(phone || "").trim().replace(/\D/g, "");
+
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(normalizedPhone);
+    } else {
+      const tempInput = document.createElement("input");
+      tempInput.value = normalizedPhone;
+      document.body.appendChild(tempInput);
+      tempInput.select();
+      document.execCommand("copy");
+      document.body.removeChild(tempInput);
+    }
+
+    alert(`Đã sao chép số điện thoại: ${normalizedPhone}`);
+  } catch (error) {
+    console.error("Không sao chép được số điện thoại:", error);
+    alert("Không thể sao chép số điện thoại trên trình duyệt này.");
+  }
+}
+
 function formatRemainingTime(ms) {
   const totalSeconds = Math.max(0, Math.ceil(ms / 1000));
   const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, "0");
@@ -318,9 +340,15 @@ function renderNeedTableRows() {
         <td>${escapeHtml(item.itemName)}</td>
         <td>${escapeHtml(item.name || "Ẩn danh")}</td>
         <td>
-  <a class="phone-link" href="${escapeHtml(buildZaloLink(item.phone))}" target="_blank" rel="noopener noreferrer">
-    ${escapeHtml(item.phone)}
-  </a>
+  <td>
+  <div class="phone-cell">
+    <a class="phone-link" href="${escapeHtml(buildZaloLink(item.phone))}" target="_blank" rel="noopener noreferrer">
+      ${escapeHtml(item.phone)}
+    </a>
+    <button type="button" class="copy-phone-btn" onclick="copyPhoneNumber('${escapeHtml(item.phone)}')">
+      Sao chép số
+    </button>
+  </div>
 </td>
       </tr>
     `)
@@ -363,9 +391,15 @@ function renderHaveTableRows() {
           <td>${escapeHtml(displayType)}</td>
           <td>${escapeHtml(displayName)}</td>
           <td>
-  <a class="phone-link" href="${escapeHtml(buildZaloLink(item.phone))}" target="_blank" rel="noopener noreferrer">
-    ${escapeHtml(item.phone)}
-  </a>
+  <td>
+  <div class="phone-cell">
+    <a class="phone-link" href="${escapeHtml(buildZaloLink(item.phone))}" target="_blank" rel="noopener noreferrer">
+      ${escapeHtml(item.phone)}
+    </a>
+    <button type="button" class="copy-phone-btn" onclick="copyPhoneNumber('${escapeHtml(item.phone)}')">
+      Sao chép số
+    </button>
+  </div>
 </td>
         </tr>
       `;
