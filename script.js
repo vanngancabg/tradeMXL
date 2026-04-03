@@ -101,6 +101,11 @@ function normalizeLink(link) {
   return String(link || "").trim().toLowerCase();
 }
 
+function buildZaloLink(phone) {
+  const normalizedPhone = String(phone || "").trim().replace(/\D/g, "");
+  return `https://zalo.me/${normalizedPhone}`;
+}
+
 function formatRemainingTime(ms) {
   const totalSeconds = Math.max(0, Math.ceil(ms / 1000));
   const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, "0");
@@ -312,7 +317,11 @@ function renderNeedTableRows() {
         <td>${escapeHtml(formatDisplayDate(item.time))}</td>
         <td>${escapeHtml(item.itemName)}</td>
         <td>${escapeHtml(item.name || "Ẩn danh")}</td>
-        <td>${escapeHtml(item.phone)}</td>
+        <td>
+  <a class="phone-link" href="${escapeHtml(buildZaloLink(item.phone))}" target="_blank" rel="noopener noreferrer">
+    ${escapeHtml(item.phone)}
+  </a>
+</td>
       </tr>
     `)
     .join("");
@@ -353,7 +362,11 @@ function renderHaveTableRows() {
           </td>
           <td>${escapeHtml(displayType)}</td>
           <td>${escapeHtml(displayName)}</td>
-          <td>${escapeHtml(item.phone)}</td>
+          <td>
+  <a class="phone-link" href="${escapeHtml(buildZaloLink(item.phone))}" target="_blank" rel="noopener noreferrer">
+    ${escapeHtml(item.phone)}
+  </a>
+</td>
         </tr>
       `;
     })
