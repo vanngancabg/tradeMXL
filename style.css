@@ -145,11 +145,12 @@ select:focus {
   box-shadow: 0 0 0 3px rgba(240, 179, 93, 0.16);
 }
 
-.btn-primary {
+.btn-primary,
+.btn-secondary,
+.btn-remove-row {
   border: none;
   border-radius: 12px;
   padding: 14px 18px;
-  background: linear-gradient(135deg, #d97706, #f59e0b);
   color: #fffaf0;
   font-size: 15px;
   font-weight: 700;
@@ -157,9 +158,33 @@ select:focus {
   transition: transform 0.18s ease, opacity 0.18s ease;
 }
 
-.btn-primary:hover {
+.btn-primary {
+  background: linear-gradient(135deg, #d97706, #f59e0b);
+}
+
+.btn-secondary {
+  background: #1f3b63;
+  padding: 10px 14px;
+  font-size: 14px;
+}
+
+.btn-remove-row {
+  background: #7f1d1d;
+  padding: 10px 14px;
+  font-size: 14px;
+}
+
+.btn-primary:hover,
+.btn-secondary:hover,
+.btn-remove-row:hover {
   transform: translateY(-1px);
   opacity: 0.95;
+}
+
+.btn-remove-row:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
 }
 
 .table-panel {
@@ -253,6 +278,33 @@ td a.link-mule {
   max-width: 260px;
 }
 
+.multi-mule-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.mule-rows-container {
+  display: grid;
+  gap: 14px;
+}
+
+.mule-row {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr auto;
+  gap: 14px;
+  padding: 14px;
+  border: 1px solid rgba(255, 180, 80, 0.12);
+  border-radius: 14px;
+  background: rgba(13, 17, 25, 0.7);
+}
+
+.mule-row-action {
+  display: flex;
+  align-items: end;
+}
+
 @media (max-width: 900px) {
   .grid-2 {
     grid-template-columns: 1fr;
@@ -264,5 +316,18 @@ td a.link-mule {
 
   .hero-desc {
     font-size: 15px;
+  }
+
+  .multi-mule-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .mule-row {
+    grid-template-columns: 1fr;
+  }
+
+  .mule-row-action {
+    align-items: stretch;
   }
 }
