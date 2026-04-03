@@ -36,6 +36,17 @@
         <p>Mọi bài đăng cần đồ của các thành viên sẽ hiển thị tại đây.</p>
       </div>
 
+      <div class="filter-bar">
+        <div class="form-group">
+          <label for="needSearchInput">Tìm theo tên đồ cần</label>
+          <input
+            type="text"
+            id="needSearchInput"
+            placeholder="Ví dụ: charm, rune, sacred..."
+          />
+        </div>
+      </div>
+
       <div class="table-wrap">
         <table>
           <thead>
@@ -56,6 +67,20 @@
       <div class="panel-header">
         <h2>Danh sách tổng hợp có đồ</h2>
         <p>Thông tin thành viên đang có đồ và link Mule sẽ hiển thị tại đây.</p>
+      </div>
+
+      <div class="filter-bar">
+        <div class="form-group">
+          <label for="haveTypeFilter">Lọc theo loại Mule</label>
+          <select id="haveTypeFilter">
+            <option value="">Tất cả loại Mule</option>
+            <option value="Đồ set xanh">Đồ set xanh</option>
+            <option value="Đồ SU - SSU">Đồ SU - SSU</option>
+            <option value="UMO - Relic">UMO - Relic</option>
+            <option value="Charm">Charm</option>
+            <option value="Khác">Khác</option>
+          </select>
+        </div>
       </div>
 
       <div class="table-wrap">
@@ -161,6 +186,6 @@
     </div>
   </footer>
 
-  <script src="script.js?v=20260403-6"></script>
+  <script src="script.js?v=20260403-7"></script>
 </body>
 </html>
