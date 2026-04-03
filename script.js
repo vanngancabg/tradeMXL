@@ -132,9 +132,9 @@ async function renderHaveTable() {
                 ${escapeHtml(displayLink)}
               </a>
             </td>
+            <td>${escapeHtml(displayType)}</td>
             <td>${escapeHtml(displayName)}</td>
             <td>${escapeHtml(item.phone)}</td>
-            <td>${escapeHtml(displayType)}</td>
             <td>
               <button class="btn-delete" onclick="deleteHaveItem('${escapeHtml(item.id)}')">Xóa</button>
             </td>
@@ -205,10 +205,10 @@ haveForm.addEventListener("submit", async function (event) {
 
   const name = document.getElementById("haveName").value.trim();
   const phone = document.getElementById("havePhone").value.trim();
-  const haveType = document.getElementById("haveType").value.trim();
   const muleLink = document.getElementById("muleLink").value.trim();
+  const haveType = document.getElementById("haveType").value.trim();
 
-  if (!phone || !haveType || !muleLink) {
+  if (!phone || !muleLink || !haveType) {
     alert("Vui lòng nhập đầy đủ thông tin ở mục có đồ.");
     submitButton.disabled = false;
     submitButton.textContent = "Gửi thông tin có đồ";
@@ -221,8 +221,8 @@ haveForm.addEventListener("submit", async function (event) {
       payload: {
         name,
         phone,
-        haveType,
-        muleLink
+        muleLink,
+        haveType
       }
     });
 
