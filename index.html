@@ -20,120 +20,133 @@
   </header>
 
   <main class="container main-content">
-    <section class="intro-card">
-      <h2>Hướng dẫn sử dụng</h2>
-      <p>
-        Thành viên trong team điền thông tin vào đúng mục bên dưới. Sau khi gửi, dữ liệu sẽ hiển thị ngay trong bảng tổng hợp để mọi người tiện theo dõi.
-      </p>
-      <p class="note">
-        <p class="note">
-  Dữ liệu hiện được lưu chung qua Google Sheets để toàn bộ thành viên trong team có thể cùng nhập và cùng theo dõi trên website.
-</p>
-      </p>
-    </section>
+  <section class="intro-card">
+    <h2>Hướng dẫn sử dụng</h2>
+    <p>
+      Thành viên trong team điền thông tin vào đúng mục bên dưới. Sau khi gửi, dữ liệu sẽ hiển thị ngay trong bảng tổng hợp để mọi người tiện theo dõi.
+    </p>
+    <p class="note">
+      Dữ liệu hiện được lưu chung qua Google Sheets để toàn bộ thành viên trong team có thể cùng nhập và cùng theo dõi trên website.
+    </p>
+  </section>
 
-    <section class="grid-2">
-      <!-- KHU CẦN ĐỒ -->
-      <div class="panel">
-        <div class="panel-header">
-          <h2>Cần đồ gì</h2>
-          <p>Người chơi đăng món đồ mình đang cần.</p>
+  <!-- DANH SÁCH TỔNG HỢP ĐƯA LÊN TRÊN -->
+  <section class="panel table-panel">
+    <div class="panel-header">
+      <h2>Danh sách tổng hợp cần đồ</h2>
+      <p>Mọi bài đăng cần đồ của các thành viên sẽ hiển thị tại đây.</p>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>STT</th>
+            <th>Thời gian</th>
+            <th>Tên đồ cần</th>
+            <th>Họ tên người cần</th>
+            <th>Số điện thoại Zalo</th>
+            <th>Thao tác</th>
+          </tr>
+        </thead>
+        <tbody id="needTableBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="panel table-panel">
+    <div class="panel-header">
+      <h2>Danh sách tổng hợp có đồ</h2>
+      <p>Thông tin thành viên đang có đồ và link Mule sẽ hiển thị tại đây.</p>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>STT</th>
+            <th>Thời gian</th>
+            <th>Link Mule chứa đồ</th>
+            <th>Họ tên</th>
+            <th>Số điện thoại Zalo</th>
+            <th>Loại Mule</th>
+            <th>Thao tác</th>
+          </tr>
+        </thead>
+        <tbody id="haveTableBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- FORM NHẬP ĐƯA XUỐNG DƯỚI -->
+  <section class="grid-2">
+    <!-- KHU CẦN ĐỒ -->
+    <div class="panel">
+      <div class="panel-header">
+        <h2>Cần đồ gì</h2>
+        <p>Người chơi đăng món đồ mình đang cần.</p>
+      </div>
+
+      <form id="needForm" class="game-form">
+        <div class="form-group">
+          <label for="needName">Họ tên người cần</label>
+          <input type="text" id="needName" placeholder="Ví dụ: Nguyễn Văn A" required />
         </div>
 
-        <form id="needForm" class="game-form">
-          <div class="form-group">
-            <label for="needName">Họ tên người cần</label>
-            <input type="text" id="needName" placeholder="Ví dụ: Nguyễn Văn A" required />
-          </div>
-
-          <div class="form-group">
-            <label for="needPhone">Số điện thoại Zalo</label>
-            <input type="text" id="needPhone" placeholder="Ví dụ: 0988xxxxxx" required />
-          </div>
-
-          <div class="form-group">
-            <label for="needItem">Tên đồ cần</label>
-            <input type="text" id="needItem" placeholder="Ví dụ: Sacred Armor, Rune, Charm..." required />
-          </div>
-
-          <button type="submit" class="btn-primary">Gửi thông tin cần đồ</button>
-        </form>
-      </div>
-
-      <!-- KHU CÓ ĐỒ -->
-      <div class="panel">
-        <div class="panel-header">
-          <h2>Có đồ gì</h2>
-          <p>Người chơi đăng thông tin đồ đang có để người khác liên hệ.</p>
+        <div class="form-group">
+          <label for="needPhone">Số điện thoại Zalo</label>
+          <input type="text" id="needPhone" placeholder="Ví dụ: 0988xxxxxx" required />
         </div>
 
-        <form id="haveForm" class="game-form">
-          <div class="form-group">
-            <label for="haveName">Tên người có đồ</label>
-            <input type="text" id="haveName" placeholder="Có thể bỏ trống nếu không muốn ghi tên" />
-          </div>
+        <div class="form-group">
+          <label for="needItem">Tên đồ cần</label>
+          <input type="text" id="needItem" placeholder="Ví dụ: Sacred Armor, Rune, Charm..." required />
+        </div>
 
-          <div class="form-group">
-            <label for="havePhone">Số điện thoại Zalo</label>
-            <input type="text" id="havePhone" placeholder="Ví dụ: 0988xxxxxx" required />
-          </div>
+        <button type="submit" class="btn-primary">Gửi thông tin cần đồ</button>
+      </form>
+    </div>
 
-          <div class="form-group">
-            <label for="muleLink">Link Mule chứa đồ</label>
-            <input type="url" id="muleLink" placeholder="Dán link Mule ở đây" required />
-          </div>
-
-          <button type="submit" class="btn-primary">Gửi thông tin có đồ</button>
-        </form>
-      </div>
-    </section>
-
-    <section class="panel table-panel">
+    <!-- KHU CÓ ĐỒ -->
+    <div class="panel">
       <div class="panel-header">
-        <h2>Danh sách tổng hợp cần đồ</h2>
-        <p>Mọi bài đăng của các thành viên sẽ hiển thị tại đây.</p>
+        <h2>Có đồ gì</h2>
+        <p>Người chơi đăng thông tin đồ đang có để người khác liên hệ.</p>
       </div>
 
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>STT</th>
-              <th>Thời gian</th>
-              <th>Họ tên người cần</th>
-              <th>Số điện thoại Zalo</th>
-              <th>Tên đồ cần</th>
-              <th>Thao tác</th>
-            </tr>
-          </thead>
-          <tbody id="needTableBody"></tbody>
-        </table>
-      </div>
-    </section>
+      <form id="haveForm" class="game-form">
+        <div class="form-group">
+          <label for="haveName">Tên người có đồ</label>
+          <input type="text" id="haveName" placeholder="Có thể bỏ trống nếu không muốn ghi tên" />
+        </div>
 
-    <section class="panel table-panel">
-      <div class="panel-header">
-        <h2>Danh sách tổng hợp có đồ</h2>
-        <p>Thông tin thành viên đang có đồ và link Mule.</p>
-      </div>
+        <div class="form-group">
+          <label for="havePhone">Số điện thoại Zalo</label>
+          <input type="text" id="havePhone" placeholder="Ví dụ: 0988xxxxxx" required />
+        </div>
 
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>STT</th>
-              <th>Thời gian</th>
-              <th>Họ tên</th>
-              <th>Số điện thoại Zalo</th>
-              <th>Link Mule chứa đồ</th>
-              <th>Thao tác</th>
-            </tr>
-          </thead>
-          <tbody id="haveTableBody"></tbody>
-        </table>
-      </div>
-    </section>
-  </main>
+        <div class="form-group">
+          <label for="haveType">Loại Mule</label>
+          <select id="haveType" required>
+            <option value="">-- Chọn loại Mule --</option>
+            <option value="Đồ set xanh">Đồ set xanh</option>
+            <option value="Đồ SU - SSU">Đồ SU - SSU</option>
+            <option value="UMO - Relic">UMO - Relic</option>
+            <option value="Charm">Charm</option>
+            <option value="Khác">Khác</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="muleLink">Link Mule chứa đồ</label>
+          <input type="url" id="muleLink" placeholder="Dán link Mule ở đây" required />
+        </div>
+
+        <button type="submit" class="btn-primary">Gửi thông tin có đồ</button>
+      </form>
+    </div>
+  </section>
+</main>
 
   <footer class="footer">
     <div class="container">
