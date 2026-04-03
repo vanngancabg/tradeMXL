@@ -61,6 +61,11 @@ function formatDisplayDate(dateValue) {
   return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
 }
 
+function isValidVietnamPhone(phone) {
+  const normalized = String(phone || "").trim();
+  return /^(0)(3|5|7|8|9)\d{8}$/.test(normalized);
+}
+
 function isValidMxlMuleLink(link) {
   const normalized = String(link || "").trim();
 
