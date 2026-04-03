@@ -1,5 +1,4 @@
-const NEED_STORAGE_KEY = "medianxl_need_list";
-const HAVE_STORAGE_KEY = "medianxl_have_list";
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw--ABnLBy2LRV1Emh2codqNxNXwuivDzniSNSplLhMhXrGf1tx7Xpuax4A97_-OYc1/exec";
 
 const needForm = document.getElementById("needForm");
 const haveForm = document.getElementById("haveForm");
@@ -7,108 +6,138 @@ const haveForm = document.getElementById("haveForm");
 const needTableBody = document.getElementById("needTableBody");
 const haveTableBody = document.getElementById("haveTableBody");
 
-function getCurrentDateTime() {
-  const now = new Date();
-  const day = String(now.getDate()).padStart(2, "0");
-  const month = String(now.getMonth() + 1).padStart(2, "0");
-  const year = now.getFullYear();
-  const hours = String(now.getHours()).padStart(2, "0");
-  const minutes = String(now.getMinutes()).padStart(2, "0");
-
-  return `${day}/${month}/${year} ${hours}:${minutes}`;
+function escapeHtml(text) {
+  return String(text || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 }
 
-function loadData(key) {
-  const data = localStorage.getItem(key);
-  return data ? JSON.parse(data) : [];
+async function getData(action) {
+  const url = `${APPS_SCRIPT_URL}?action=${encodeURIComponent(action)}`;
+  const response = await fetch(url);
+  return await response.json();
 }
 
-function saveData(key, data) {
-  localStorage.setItem(key, JSON.stringify(data));
+async function postData(bodyData) {
+  const response = await fetch(APPS_SCRIPT_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "text/plain;charset=utf-8"
+    },
+    body: JSON.stringify(bodyData)
+  });
+
+  return await response.json();
 }
 
-function renderNeedTable() {
-  const needList = loadData(NEED_STORAGE_KEY);
+async function renderNeedTable() {
+  needTableBody.innerHTML = `
+    <tr>
+      <td colspan="6" class="empty-row">Đang tải dữ liệu...</td>
+    </tr>
+  `;
 
-  if (needList.length === 0) {
+  try {
+    const result = await getData("getNeedList");
+    const needList = result.data || [];
+
+    if (needList.length === 0) {
+      needTableBody.innerHTML = `
+        <tr>
+          <td colspan="6" class="empty-row">Chưa có dữ liệu cần đồ.</td>
+        </tr>
+      `;
+      return;
+    }
+
+    needTableBody.innerHTML = needList
+      .map((item, index) => {
+        return `
+          <tr>
+            <td>${index + 1}</td>
+            <td>${escapeHtml(item.time)}</td>
+            <td>${escapeHtml(item.name)}</td>
+            <td>${escapeHtml(item.phone)}</td>
+            <td>${escapeHtml(item.itemName)}</td>
+            <td>
+              <button class="btn-delete" onclick="deleteNeedItem('${escapeHtml(item.id)}')">Xóa</button>
+            </td>
+          </tr>
+        `;
+      })
+      .join("");
+  } catch (error) {
     needTableBody.innerHTML = `
       <tr>
-        <td colspan="6" class="empty-row">Chưa có dữ liệu cần đồ.</td>
+        <td colspan="6" class="empty-row">Không tải được dữ liệu cần đồ.</td>
       </tr>
     `;
-    return;
+    console.error("Lỗi renderNeedTable:", error);
   }
-
-  needTableBody.innerHTML = needList
-    .map((item, index) => {
-      return `
-        <tr>
-          <td>${index + 1}</td>
-          <td>${item.time}</td>
-          <td>${item.name}</td>
-          <td>${item.phone}</td>
-          <td>${item.itemName}</td>
-          <td>
-            <button class="btn-delete" onclick="deleteNeedItem('${item.id}')">Xóa</button>
-          </td>
-        </tr>
-      `;
-    })
-    .join("");
 }
 
-function renderHaveTable() {
-  const haveList = loadData(HAVE_STORAGE_KEY);
+async function renderHaveTable() {
+  haveTableBody.innerHTML = `
+    <tr>
+      <td colspan="6" class="empty-row">Đang tải dữ liệu...</td>
+    </tr>
+  `;
 
-  if (haveList.length === 0) {
+  try {
+    const result = await getData("getHaveList");
+    const haveList = result.data || [];
+
+    if (haveList.length === 0) {
+      haveTableBody.innerHTML = `
+        <tr>
+          <td colspan="6" class="empty-row">Chưa có dữ liệu có đồ.</td>
+        </tr>
+      `;
+      return;
+    }
+
+    haveTableBody.innerHTML = haveList
+      .map((item, index) => {
+        const displayName =
+          item.name && item.name.trim() !== "" ? item.name : "Không ghi tên";
+
+        return `
+          <tr>
+            <td>${index + 1}</td>
+            <td>${escapeHtml(item.time)}</td>
+            <td>${escapeHtml(displayName)}</td>
+            <td>${escapeHtml(item.phone)}</td>
+            <td>
+              <a class="link-mule" href="${escapeHtml(item.muleLink)}" target="_blank" rel="noopener noreferrer">
+                ${escapeHtml(item.muleLink)}
+              </a>
+            </td>
+            <td>
+              <button class="btn-delete" onclick="deleteHaveItem('${escapeHtml(item.id)}')">Xóa</button>
+            </td>
+          </tr>
+        `;
+      })
+      .join("");
+  } catch (error) {
     haveTableBody.innerHTML = `
       <tr>
-        <td colspan="6" class="empty-row">Chưa có dữ liệu có đồ.</td>
+        <td colspan="6" class="empty-row">Không tải được dữ liệu có đồ.</td>
       </tr>
     `;
-    return;
+    console.error("Lỗi renderHaveTable:", error);
   }
-
-  haveTableBody.innerHTML = haveList
-    .map((item, index) => {
-      const displayName = item.name && item.name.trim() !== "" ? item.name : "Không ghi tên";
-
-      return `
-        <tr>
-          <td>${index + 1}</td>
-          <td>${item.time}</td>
-          <td>${displayName}</td>
-          <td>${item.phone}</td>
-          <td>
-            <a class="link-mule" href="${item.muleLink}" target="_blank" rel="noopener noreferrer">
-              ${item.muleLink}
-            </a>
-          </td>
-          <td>
-            <button class="btn-delete" onclick="deleteHaveItem('${item.id}')">Xóa</button>
-          </td>
-        </tr>
-      `;
-    })
-    .join("");
 }
 
-function deleteNeedItem(id) {
-  const needList = loadData(NEED_STORAGE_KEY);
-  const newList = needList.filter(item => item.id !== id);
-  saveData(NEED_STORAGE_KEY, newList);
-  renderNeedTable();
-}
-
-function deleteHaveItem(id) {
-  const haveList = loadData(HAVE_STORAGE_KEY);
-  const newList = haveList.filter(item => item.id !== id);
-  saveData(HAVE_STORAGE_KEY, newList);
-  renderHaveTable();
-}
-
-needForm.addEventListener("submit", function (event) {
+needForm.addEventListener("submit", async function (event) {
   event.preventDefault();
+
+  const submitButton = needForm.querySelector("button[type='submit']");
+  submitButton.disabled = true;
+  submitButton.textContent = "Đang gửi...";
 
   const name = document.getElementById("needName").value.trim();
   const phone = document.getElementById("needPhone").value.trim();
@@ -116,28 +145,43 @@ needForm.addEventListener("submit", function (event) {
 
   if (!name || !phone || !itemName) {
     alert("Vui lòng nhập đầy đủ thông tin ở mục cần đồ.");
+    submitButton.disabled = false;
+    submitButton.textContent = "Gửi thông tin cần đồ";
     return;
   }
 
-  const needList = loadData(NEED_STORAGE_KEY);
+  try {
+    const result = await postData({
+      action: "addNeedItem",
+      payload: {
+        name,
+        phone,
+        itemName
+      }
+    });
 
-  const newItem = {
-    id: Date.now().toString(),
-    time: getCurrentDateTime(),
-    name,
-    phone,
-    itemName
-  };
+    if (!result.success) {
+      throw new Error(result.message || "Không thể gửi dữ liệu");
+    }
 
-  needList.unshift(newItem);
-  saveData(NEED_STORAGE_KEY, needList);
-
-  needForm.reset();
-  renderNeedTable();
+    needForm.reset();
+    await renderNeedTable();
+    alert("Đã gửi thông tin cần đồ thành công.");
+  } catch (error) {
+    console.error("Lỗi gửi needForm:", error);
+    alert("Gửi dữ liệu thất bại. Bạn kiểm tra lại Web App URL hoặc quyền triển khai Apps Script.");
+  } finally {
+    submitButton.disabled = false;
+    submitButton.textContent = "Gửi thông tin cần đồ";
+  }
 });
 
-haveForm.addEventListener("submit", function (event) {
+haveForm.addEventListener("submit", async function (event) {
   event.preventDefault();
+
+  const submitButton = haveForm.querySelector("button[type='submit']");
+  submitButton.disabled = true;
+  submitButton.textContent = "Đang gửi...";
 
   const name = document.getElementById("haveName").value.trim();
   const phone = document.getElementById("havePhone").value.trim();
@@ -145,25 +189,78 @@ haveForm.addEventListener("submit", function (event) {
 
   if (!phone || !muleLink) {
     alert("Vui lòng nhập đầy đủ thông tin ở mục có đồ.");
+    submitButton.disabled = false;
+    submitButton.textContent = "Gửi thông tin có đồ";
     return;
   }
 
-  const haveList = loadData(HAVE_STORAGE_KEY);
+  try {
+    const result = await postData({
+      action: "addHaveItem",
+      payload: {
+        name,
+        phone,
+        muleLink
+      }
+    });
 
-  const newItem = {
-    id: Date.now().toString(),
-    time: getCurrentDateTime(),
-    name,
-    phone,
-    muleLink
-  };
+    if (!result.success) {
+      throw new Error(result.message || "Không thể gửi dữ liệu");
+    }
 
-  haveList.unshift(newItem);
-  saveData(HAVE_STORAGE_KEY, haveList);
-
-  haveForm.reset();
-  renderHaveTable();
+    haveForm.reset();
+    await renderHaveTable();
+    alert("Đã gửi thông tin có đồ thành công.");
+  } catch (error) {
+    console.error("Lỗi gửi haveForm:", error);
+    alert("Gửi dữ liệu thất bại. Bạn kiểm tra lại Web App URL hoặc quyền triển khai Apps Script.");
+  } finally {
+    submitButton.disabled = false;
+    submitButton.textContent = "Gửi thông tin có đồ";
+  }
 });
+
+async function deleteNeedItem(id) {
+  const confirmDelete = confirm("Bạn có chắc muốn xóa dòng này không?");
+  if (!confirmDelete) return;
+
+  try {
+    const result = await postData({
+      action: "deleteNeedItem",
+      id
+    });
+
+    if (!result.success) {
+      throw new Error(result.message || "Không thể xóa dữ liệu");
+    }
+
+    await renderNeedTable();
+  } catch (error) {
+    console.error("Lỗi xóa need item:", error);
+    alert("Xóa dữ liệu thất bại.");
+  }
+}
+
+async function deleteHaveItem(id) {
+  const confirmDelete = confirm("Bạn có chắc muốn xóa dòng này không?");
+  if (!confirmDelete) return;
+
+  try {
+    const result = await postData({
+      action: "deleteHaveItem",
+      id
+    });
+
+    if (!result.success) {
+      throw new Error(result.message || "Không thể xóa dữ liệu");
+    }
+
+    await renderHaveTable();
+  } catch (error) {
+    console.error("Lỗi xóa have item:", error);
+    alert("Xóa dữ liệu thất bại.");
+  }
+}
 
 renderNeedTable();
 renderHaveTable();
