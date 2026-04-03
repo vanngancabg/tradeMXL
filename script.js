@@ -44,7 +44,7 @@ async function renderNeedTable() {
     const result = await getData("getNeedList");
     const needList = result.data || [];
 
-    if (needList.length === 0) {
+    if (!needList.length) {
       needTableBody.innerHTML = `
         <tr>
           <td colspan="6" class="empty-row">Chưa có dữ liệu cần đồ.</td>
@@ -54,20 +54,18 @@ async function renderNeedTable() {
     }
 
     needTableBody.innerHTML = needList
-      .map((item, index) => {
-        return `
-          <tr>
-            <td>${index + 1}</td>
-            <td>${escapeHtml(item.time)}</td>
-            <td>${escapeHtml(item.itemName)}</td>
-            <td>${escapeHtml(item.name)}</td>
-            <td>${escapeHtml(item.phone)}</td>
-            <td>
-              <button class="btn-delete" onclick="deleteNeedItem('${escapeHtml(item.id)}')">Xóa</button>
-            </td>
-          </tr>
-        `;
-      })
+      .map((item, index) => `
+        <tr>
+          <td>${index + 1}</td>
+          <td>${escapeHtml(item.time)}</td>
+          <td>${escapeHtml(item.itemName)}</td>
+          <td>${escapeHtml(item.name)}</td>
+          <td>${escapeHtml(item.phone)}</td>
+          <td>
+            <button class="btn-delete" onclick="deleteNeedItem('${escapeHtml(item.id)}')">Xóa</button>
+          </td>
+        </tr>
+      `)
       .join("");
   } catch (error) {
     needTableBody.innerHTML = `
@@ -90,7 +88,7 @@ async function renderHaveTable() {
     const result = await getData("getHaveList");
     const haveList = result.data || [];
 
-    if (haveList.length === 0) {
+    if (!haveList.length) {
       haveTableBody.innerHTML = `
         <tr>
           <td colspan="7" class="empty-row">Chưa có dữ liệu có đồ.</td>
@@ -101,19 +99,17 @@ async function renderHaveTable() {
 
     haveTableBody.innerHTML = haveList
       .map((item, index) => {
-        const displayName =
-          item.name && item.name.trim() !== "" ? item.name : "Không ghi tên";
-
-        const displayType =
-          item.haveType && item.haveType.trim() !== "" ? item.haveType : "Khác";
+        const displayName = item.name && item.name.trim() ? item.name : "Không ghi tên";
+        const displayType = item.haveType && item.haveType.trim() ? item.haveType : "Khác";
+        const displayLink = item.muleLink || "";
 
         return `
           <tr>
             <td>${index + 1}</td>
             <td>${escapeHtml(item.time)}</td>
             <td>
-              <a class="link-mule" href="${escapeHtml(item.muleLink)}" target="_blank" rel="noopener noreferrer">
-                ${escapeHtml(item.muleLink)}
+              <a class="link-mule" href="${escapeHtml(displayLink)}" target="_blank" rel="noopener noreferrer">
+                ${escapeHtml(displayLink)}
               </a>
             </td>
             <td>${escapeHtml(displayName)}</td>
@@ -173,7 +169,7 @@ needForm.addEventListener("submit", async function (event) {
     alert("Đã gửi thông tin cần đồ thành công.");
   } catch (error) {
     console.error("Lỗi gửi needForm:", error);
-    alert("Gửi dữ liệu thất bại. Bạn kiểm tra lại Web App URL hoặc quyền triển khai Apps Script.");
+    alert("Gửi dữ liệu thất bại ở mục cần đồ.");
   } finally {
     submitButton.disabled = false;
     submitButton.textContent = "Gửi thông tin cần đồ";
@@ -219,34 +215,7 @@ haveForm.addEventListener("submit", async function (event) {
     alert("Đã gửi thông tin có đồ thành công.");
   } catch (error) {
     console.error("Lỗi gửi haveForm:", error);
-    alert("Gửi dữ liệu thất bại. Bạn kiểm tra lại Web App URL hoặc quyền triển khai Apps Script.");
-  } finally {
-    submitButton.disabled = false;
-    submitButton.textContent = "Gửi thông tin có đồ";
-  }
-});
-
-
-  try {
-    const result = await postData({
-      action: "addHaveItem",
-      payload: {
-        name,
-        phone,
-        muleLink
-      }
-    });
-
-    if (!result.success) {
-      throw new Error(result.message || "Không thể gửi dữ liệu");
-    }
-
-    haveForm.reset();
-    await renderHaveTable();
-    alert("Đã gửi thông tin có đồ thành công.");
-  } catch (error) {
-    console.error("Lỗi gửi haveForm:", error);
-    alert("Gửi dữ liệu thất bại. Bạn kiểm tra lại Web App URL hoặc quyền triển khai Apps Script.");
+    alert("Gửi dữ liệu thất bại ở mục có đồ.");
   } finally {
     submitButton.disabled = false;
     submitButton.textContent = "Gửi thông tin có đồ";
