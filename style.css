@@ -192,6 +192,13 @@ select:focus {
   overflow: hidden;
 }
 
+.filter-bar {
+  display: grid;
+  grid-template-columns: minmax(260px, 420px);
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
 .table-wrap {
   overflow-x: auto;
 }
@@ -240,11 +247,6 @@ td {
 
 .link-mule:hover {
   text-decoration: underline;
-}
-
-
-.btn-delete:hover {
-  opacity: 0.9;
 }
 
 .footer {
@@ -320,5 +322,9 @@ td a.link-mule {
 
   .mule-row-action {
     align-items: stretch;
+  }
+
+  .filter-bar {
+    grid-template-columns: 1fr;
   }
 }
