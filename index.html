@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Diablo 2 Median XL - Cộng Đồng Trao Đổi Đồ</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="page-bg"></div>
+
+  <header class="hero">
+    <div class="container">
+      <p class="eyebrow">CỘNG ĐỒNG DIABLO 2 MEDIAN XL</p>
+      <h1>Trang thông tin trao đổi đồ của team</h1>
+      <p class="hero-desc">
+        Nơi mọi người đăng thông tin đang cần đồ gì và đang có đồ gì để các thành viên khác dễ theo dõi và liên hệ qua Zalo.
+      </p>
+    </div>
+  </header>
+
+  <main class="container main-content">
+    <section class="intro-card">
+      <h2>Hướng dẫn sử dụng</h2>
+      <p>
+        Thành viên trong team điền thông tin vào đúng mục bên dưới. Sau khi gửi, dữ liệu sẽ hiển thị ngay trong bảng tổng hợp để mọi người tiện theo dõi.
+      </p>
+      <p class="note">
+        Phiên bản hiện tại đang lưu dữ liệu trên trình duyệt để kiểm tra giao diện và chức năng. Bước tiếp theo sẽ kết nối Google Sheets để toàn team cùng xem chung dữ liệu.
+      </p>
+    </section>
+
+    <section class="grid-2">
+      <!-- KHU CẦN ĐỒ -->
+      <div class="panel">
+        <div class="panel-header">
+          <h2>Cần đồ gì</h2>
+          <p>Người chơi đăng món đồ mình đang cần.</p>
+        </div>
+
+        <form id="needForm" class="game-form">
+          <div class="form-group">
+            <label for="needName">Họ tên người cần</label>
+            <input type="text" id="needName" placeholder="Ví dụ: Nguyễn Văn A" required />
+          </div>
+
+          <div class="form-group">
+            <label for="needPhone">Số điện thoại Zalo</label>
+            <input type="text" id="needPhone" placeholder="Ví dụ: 0988xxxxxx" required />
+          </div>
+
+          <div class="form-group">
+            <label for="needItem">Tên đồ cần</label>
+            <input type="text" id="needItem" placeholder="Ví dụ: Sacred Armor, Rune, Charm..." required />
+          </div>
+
+          <button type="submit" class="btn-primary">Gửi thông tin cần đồ</button>
+        </form>
+      </div>
+
+      <!-- KHU CÓ ĐỒ -->
+      <div class="panel">
+        <div class="panel-header">
+          <h2>Có đồ gì</h2>
+          <p>Người chơi đăng thông tin đồ đang có để người khác liên hệ.</p>
+        </div>
+
+        <form id="haveForm" class="game-form">
+          <div class="form-group">
+            <label for="haveName">Tên người có đồ</label>
+            <input type="text" id="haveName" placeholder="Có thể bỏ trống nếu không muốn ghi tên" />
+          </div>
+
+          <div class="form-group">
+            <label for="havePhone">Số điện thoại Zalo</label>
+            <input type="text" id="havePhone" placeholder="Ví dụ: 0988xxxxxx" required />
+          </div>
+
+          <div class="form-group">
+            <label for="muleLink">Link Mule chứa đồ</label>
+            <input type="url" id="muleLink" placeholder="Dán link Mule ở đây" required />
+          </div>
+
+          <button type="submit" class="btn-primary">Gửi thông tin có đồ</button>
+        </form>
+      </div>
+    </section>
+
+    <section class="panel table-panel">
+      <div class="panel-header">
+        <h2>Danh sách tổng hợp cần đồ</h2>
+        <p>Mọi bài đăng của các thành viên sẽ hiển thị tại đây.</p>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>STT</th>
+              <th>Thời gian</th>
+              <th>Họ tên người cần</th>
+              <th>Số điện thoại Zalo</th>
+              <th>Tên đồ cần</th>
+              <th>Thao tác</th>
+            </tr>
+          </thead>
+          <tbody id="needTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel table-panel">
+      <div class="panel-header">
+        <h2>Danh sách tổng hợp có đồ</h2>
+        <p>Thông tin thành viên đang có đồ và link Mule.</p>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>STT</th>
+              <th>Thời gian</th>
+              <th>Họ tên</th>
+              <th>Số điện thoại Zalo</th>
+              <th>Link Mule chứa đồ</th>
+              <th>Thao tác</th>
+            </tr>
+          </thead>
+          <tbody id="haveTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <p>Website cộng đồng Diablo 2 Median XL - Bản nền giao diện v1</p>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
