@@ -23,7 +23,7 @@
     <section class="intro-card">
       <h2>Hướng dẫn sử dụng</h2>
       <p>
-        Thành viên trong team điền thông tin vào đúng mục bên dưới. Sau khi gửi, dữ liệu sẽ hiển thị ngay trong bảng tổng hợp để mọi người tiện theo dõi.
+        Thành viên trong team điền thông tin vào đúng mục bên dưới. Với phần "Có đồ", một người có thể thêm nhiều link Mule và mỗi link sẽ tương ứng với một loại Mule khác nhau.
       </p>
       <p class="note">
         Dữ liệu hiện được lưu chung qua Google Sheets để toàn bộ thành viên trong team có thể cùng nhập và cùng theo dõi trên website.
@@ -107,7 +107,7 @@
       <div class="panel">
         <div class="panel-header">
           <h2>Có đồ gì</h2>
-          <p>Người chơi đăng thông tin đồ đang có để người khác liên hệ.</p>
+          <p>Người chơi đăng nhiều link Mule trong một lần gửi.</p>
         </div>
 
         <form id="haveForm" class="game-form">
@@ -121,21 +121,34 @@
             <input type="text" id="havePhone" placeholder="Ví dụ: 0988xxxxxx" required />
           </div>
 
-          <div class="form-group">
-            <label for="muleLink">Link Mule chứa đồ</label>
-            <input type="url" id="muleLink" placeholder="Dán link Mule ở đây" required />
+          <div class="multi-mule-header">
+            <label>Danh sách Link Mule và Loại Mule</label>
+            <button type="button" id="addMuleRowBtn" class="btn-secondary">+ Thêm Link Mule</button>
           </div>
 
-          <div class="form-group">
-            <label for="haveType">Loại Mule</label>
-            <select id="haveType" required>
-              <option value="">-- Chọn loại Mule --</option>
-              <option value="Đồ set xanh">Đồ set xanh</option>
-              <option value="Đồ SU - SSU">Đồ SU - SSU</option>
-              <option value="UMO - Relic">UMO - Relic</option>
-              <option value="Charm">Charm</option>
-              <option value="Khác">Khác</option>
-            </select>
+          <div id="muleRowsContainer" class="mule-rows-container">
+            <div class="mule-row">
+              <div class="form-group">
+                <label>Link Mule chứa đồ</label>
+                <input type="url" class="mule-link-input" placeholder="Dán link Mule ở đây" required />
+              </div>
+
+              <div class="form-group">
+                <label>Loại Mule</label>
+                <select class="have-type-select" required>
+                  <option value="">-- Chọn loại Mule --</option>
+                  <option value="Đồ set xanh">Đồ set xanh</option>
+                  <option value="Đồ SU - SSU">Đồ SU - SSU</option>
+                  <option value="UMO - Relic">UMO - Relic</option>
+                  <option value="Charm">Charm</option>
+                  <option value="Khác">Khác</option>
+                </select>
+              </div>
+
+              <div class="mule-row-action">
+                <button type="button" class="btn-remove-row" disabled>Xóa dòng</button>
+              </div>
+            </div>
           </div>
 
           <button type="submit" class="btn-primary">Gửi thông tin có đồ</button>
@@ -150,6 +163,6 @@
     </div>
   </footer>
 
-  <script src="script.js"></script>
+  <script src="script.js?v=20260403-3"></script>
 </body>
 </html>
