@@ -359,27 +359,27 @@ function renderNeedTableRows() {
         <td>${escapeHtml(item.itemName)}</td>
         <td>${escapeHtml(item.name || "Ẩn danh")}</td>
         <td>
-  <td>
-  <div class="phone-cell">
-    <a class="phone-link" href="${escapeHtml(buildZaloLink(item.phone))}" target="_blank" rel="noopener noreferrer">
-      ${escapeHtml(item.phone)}
-    </a>
-    <button
-      type="button"
-      class="copy-phone-btn"
-      data-original-text="Copy"
-      onclick="copyPhoneNumber('${escapeHtml(item.phone)}', this)"
-      title="Sao chép số điện thoại"
-      aria-label="Sao chép số điện thoại"
-    >
-      Copy
-    </button>
-  </div>
-</td>
+          <div class="phone-cell">
+            <a class="phone-link" href="${escapeHtml(buildZaloLink(item.phone))}" target="_blank" rel="noopener noreferrer">
+              ${escapeHtml(item.phone)}
+            </a>
+            <button
+              type="button"
+              class="copy-phone-btn"
+              data-original-text="Copy"
+              onclick="copyPhoneNumber('${escapeHtml(item.phone)}', this)"
+              title="Sao chép số điện thoại"
+              aria-label="Sao chép số điện thoại"
+            >
+              Copy
+            </button>
+          </div>
+        </td>
       </tr>
     `)
     .join("");
 }
+
 
 function renderHaveTableRows() {
   const filteredList = getFilteredHaveList();
@@ -417,23 +417,22 @@ function renderHaveTableRows() {
           <td>${escapeHtml(displayType)}</td>
           <td>${escapeHtml(displayName)}</td>
           <td>
-  <td>
-  <div class="phone-cell">
-    <a class="phone-link" href="${escapeHtml(buildZaloLink(item.phone))}" target="_blank" rel="noopener noreferrer">
-      ${escapeHtml(item.phone)}
-    </a>
-    <button
-      type="button"
-      class="copy-phone-btn"
-      data-original-text="Copy"
-      onclick="copyPhoneNumber('${escapeHtml(item.phone)}', this)"
-      title="Sao chép số điện thoại"
-      aria-label="Sao chép số điện thoại"
-    >
-      Copy
-    </button>
-  </div>
-</td>
+            <div class="phone-cell">
+              <a class="phone-link" href="${escapeHtml(buildZaloLink(item.phone))}" target="_blank" rel="noopener noreferrer">
+                ${escapeHtml(item.phone)}
+              </a>
+              <button
+                type="button"
+                class="copy-phone-btn"
+                data-original-text="Copy"
+                onclick="copyPhoneNumber('${escapeHtml(item.phone)}', this)"
+                title="Sao chép số điện thoại"
+                aria-label="Sao chép số điện thoại"
+              >
+                Copy
+              </button>
+            </div>
+          </td>
         </tr>
       `;
     })
