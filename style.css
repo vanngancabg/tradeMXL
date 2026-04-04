@@ -145,6 +145,33 @@ select:focus {
   box-shadow: 0 0 0 3px rgba(240, 179, 93, 0.16);
 }
 
+.input-error {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.18) !important;
+}
+
+.field-error {
+  margin-top: 6px;
+  color: #fda4af;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.form-alert {
+  display: none;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(127, 29, 29, 0.18);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #ffd6d6;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.form-alert.is-active {
+  display: block;
+}
+
 .btn-primary,
 .btn-secondary,
 .btn-remove-row,
@@ -376,6 +403,19 @@ td a.link-mule {
   border: 1px solid rgba(255, 180, 80, 0.12);
   border-radius: 14px;
   background: rgba(13, 17, 25, 0.7);
+}
+
+.mule-row.has-error {
+  border-color: rgba(239, 68, 68, 0.45);
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.08);
+}
+
+.mule-row-error {
+  grid-column: 1 / -1;
+  margin-top: 4px;
+  color: #fda4af;
+  font-size: 13px;
+  line-height: 1.4;
 }
 
 .mule-row-action {
