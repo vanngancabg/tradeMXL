@@ -219,15 +219,21 @@ function ensureCooldownTimer() {
   cooldownTimer = setInterval(updateCooldownUI, 1000);
 }
 
-function getOrCreateFieldErrorElement(field) {
-  let errorEl = field.parentElement.querySelector(".field-error");
+function getFieldErrorElements(field) {
+  return Array.from(field.parentElement.querySelectorAll(".field-error"));
+}
 
-  if (!errorEl) {
-    errorEl = document.createElement("div");
-    errorEl.className = "field-error";
-    field.parentElement.appendChild(errorEl);
+function getOrCreateFieldErrorElement(field) {
+  const existing = getFieldErrorElements(field);
+
+  if (existing.length > 0) {
+    existing.slice(1).forEach((el) => el.remove());
+    return existing[0];
   }
 
+  const errorEl = document.createElement("div");
+  errorEl.className = "field-error";
+  field.parentElement.appendChild(errorEl);
   return errorEl;
 }
 
@@ -241,8 +247,13 @@ function setFieldError(field, message) {
 function clearFieldError(field) {
   if (!field) return;
   field.classList.remove("input-error");
-  const errorEl = field.parentElement.querySelector(".field-error");
-  if (errorEl) errorEl.textContent = "";
+  getFieldErrorElements(field).forEach((el, index) => {
+    if (index === 0) {
+      el.textContent = "";
+    } else {
+      el.remove();
+    }
+  });
 }
 
 function showFormAlert(alertElement, message) {
@@ -257,15 +268,21 @@ function clearFormAlert(alertElement) {
   alertElement.classList.remove("is-active");
 }
 
-function getOrCreateRowErrorElement(row) {
-  let errorEl = row.querySelector(".mule-row-error");
+function getRowErrorElements(row) {
+  return Array.from(row.querySelectorAll(".mule-row-error"));
+}
 
-  if (!errorEl) {
-    errorEl = document.createElement("div");
-    errorEl.className = "mule-row-error";
-    row.appendChild(errorEl);
+function getOrCreateRowErrorElement(row) {
+  const existing = getRowErrorElements(row);
+
+  if (existing.length > 0) {
+    existing.slice(1).forEach((el) => el.remove());
+    return existing[0];
   }
 
+  const errorEl = document.createElement("div");
+  errorEl.className = "mule-row-error";
+  row.appendChild(errorEl);
   return errorEl;
 }
 
@@ -279,8 +296,13 @@ function setRowError(row, message) {
 function clearRowError(row) {
   if (!row) return;
   row.classList.remove("has-error");
-  const errorEl = row.querySelector(".mule-row-error");
-  if (errorEl) errorEl.textContent = "";
+  getRowErrorElements(row).forEach((el, index) => {
+    if (index === 0) {
+      el.textContent = "";
+    } else {
+      el.remove();
+    }
+  });
 }
 
 function clearNeedFormErrors() {
@@ -595,7 +617,7 @@ function highlightHaveServerError(message, muleEntries = []) {
     const typeSelect = row.querySelector(".have-type-select");
     setFieldError(linkInput, "Bạn phải nhập Link Mule.");
     setFieldError(typeSelect, "Bạn phải chọn Loại Mule.");
-    setRowError(row, message);
+    setRowError(row, "Bạn phải nhập ít nhất 1 dòng đầy đủ.");
     focusField(linkInput);
     return;
   }
@@ -610,7 +632,7 @@ function highlightHaveServerError(message, muleEntries = []) {
       if (!linkValue || !typeValue) {
         if (!linkValue) setFieldError(linkInput, "Bạn chưa nhập Link Mule.");
         if (!typeValue) setFieldError(typeSelect, "Bạn chưa chọn Loại Mule.");
-        setRowError(row, message);
+        setRowError(row, "Dòng này đang thiếu dữ liệu.");
       }
     });
 
@@ -629,7 +651,6 @@ function highlightHaveServerError(message, muleEntries = []) {
       const linkInput = row.querySelector(".mule-link-input");
       if (!isValidMxlMuleLink(linkInput.value.trim())) {
         setFieldError(linkInput, message);
-        setRowError(row, message);
       }
     });
 
@@ -660,7 +681,6 @@ function highlightHaveServerError(message, muleEntries = []) {
 
       if (duplicateSet.has(normalized) || existingLinkSet.has(normalized)) {
         setFieldError(linkInput, message);
-        setRowError(row, message);
       }
     });
 
@@ -675,8 +695,9 @@ function highlightHaveServerError(message, muleEntries = []) {
   }
 
   const firstRow = rows[0];
-  setRowError(firstRow, message);
-  focusField(firstRow.querySelector(".mule-link-input"));
+  const firstLink = firstRow.querySelector(".mule-link-input");
+  setFieldError(firstLink, message);
+  focusField(firstLink);
 }
 
 addMuleRowBtn.addEventListener("click", addMuleRow);
@@ -775,8 +796,6 @@ muleRowsContainer.addEventListener("input", function (event) {
   if (event.target.classList.contains("mule-link-input")) {
     clearFieldError(event.target);
     clearFormAlert(haveFormAlert);
-    const row = event.target.closest(".mule-row");
-    if (row) clearRowError(row);
   }
 });
 
