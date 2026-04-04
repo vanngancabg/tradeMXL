@@ -26,14 +26,14 @@
         Trang web hiển thị 02 bảng danh sách đồ cần và danh sách mule (đều có lọc tìm). Ae có thể điền thông tin cần mua, xin và điền thông tin link mule ở cuối trang web.
       </p>
       <p class="note">
-        Lưu ý: Để tránh Spam, giới hạn gửi 1 lần sau 5 phút. Hãy kiểm tra lại chính xác các thông tin trước khi nhập.
+        Lưu ý: Để tránh spam, giới hạn gửi 1 lần sau 5 phút. Hãy kiểm tra lại chính xác các thông tin trước khi nhập.
       </p>
     </section>
 
     <section class="panel table-panel">
       <div class="panel-header">
         <h2>Danh sách tổng hợp đồ cần mua, xin</h2>
-        </div>
+      </div>
 
       <div class="filter-bar">
         <div class="form-group">
@@ -73,7 +73,6 @@
     <section class="panel table-panel">
       <div class="panel-header">
         <h2>Danh sách tổng hợp các link mule</h2>
-        
       </div>
 
       <div class="filter-bar">
@@ -122,7 +121,7 @@
           <p>Người chơi đăng món đồ mình đang cần.</p>
         </div>
 
-        <form id="needForm" class="game-form">
+        <form id="needForm" class="game-form" novalidate>
           <div class="form-group">
             <label for="needName">Họ tên người cần</label>
             <input type="text" id="needName" placeholder="Có thể bỏ trống, mặc định là Ẩn danh" />
@@ -130,16 +129,17 @@
 
           <div class="form-group">
             <label for="needPhone">Số điện thoại Zalo</label>
-            <input type="text" id="needPhone" placeholder="Ví dụ: 0988xxxxxx" required />
+            <input type="text" id="needPhone" placeholder="Ví dụ: 0988xxxxxx" />
           </div>
 
           <div class="form-group">
             <label for="needItem">Tên đồ cần</label>
-            <input type="text" id="needItem" placeholder="Ví dụ: Sacred Armor, Rune, Charm..." required />
+            <input type="text" id="needItem" placeholder="Ví dụ: Sacred Armor, Rune, Charm..." />
           </div>
 
           <button type="submit" class="btn-primary">Nhập thông tin</button>
           <div id="needCooldownNote" class="cooldown-note"></div>
+          <div id="needFormAlert" class="form-alert"></div>
         </form>
       </div>
 
@@ -149,7 +149,7 @@
           <p>Người chơi có thể đăng nhiều link Mule trong một lần gửi.</p>
         </div>
 
-        <form id="haveForm" class="game-form">
+        <form id="haveForm" class="game-form" novalidate>
           <div class="form-group">
             <label for="haveName">Tên chủ sở hữu</label>
             <input type="text" id="haveName" placeholder="Có thể bỏ trống nếu không muốn ghi tên" />
@@ -157,7 +157,7 @@
 
           <div class="form-group">
             <label for="havePhone">Số điện thoại Zalo</label>
-            <input type="text" id="havePhone" placeholder="Ví dụ: 0988xxxxxx" required />
+            <input type="text" id="havePhone" placeholder="Ví dụ: 0988xxxxxx" />
           </div>
 
           <div class="multi-mule-header">
@@ -169,12 +169,12 @@
             <div class="mule-row">
               <div class="form-group">
                 <label>Link Mule chứa đồ</label>
-                <input type="url" class="mule-link-input" placeholder="Dán link Mule ở đây" required />
+                <input type="url" class="mule-link-input" placeholder="Dán link Mule ở đây" />
               </div>
 
               <div class="form-group">
                 <label>Loại Mule</label>
-                <select class="have-type-select" required>
+                <select class="have-type-select">
                   <option value="">-- Chọn loại Mule --</option>
                   <option value="Đồ set xanh">Đồ set xanh</option>
                   <option value="Đồ SU - SSU">Đồ SU - SSU</option>
@@ -192,6 +192,7 @@
 
           <button type="submit" class="btn-primary">Nhập thông tin Mule</button>
           <div id="haveCooldownNote" class="cooldown-note"></div>
+          <div id="haveFormAlert" class="form-alert"></div>
         </form>
       </div>
     </section>
@@ -203,6 +204,6 @@
     </div>
   </footer>
 
-  <script src="script.js?v=20260403-19"></script>
+  <script src="script.js?v=20260403-20"></script>
 </body>
 </html>
