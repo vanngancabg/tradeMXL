@@ -298,16 +298,24 @@ td {
   border: 1px solid rgba(255, 210, 139, 0.35);
   background: rgba(255, 210, 139, 0.08);
   color: #ffd28b;
-  border-radius: 8px;
-  padding: 6px 10px;
-  font-size: 12px;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 11px;
+  line-height: 1.2;
   cursor: pointer;
-  transition: opacity 0.18s ease, transform 0.18s ease;
+  transition: opacity 0.18s ease, transform 0.18s ease, background 0.18s ease, color 0.18s ease;
+  white-space: nowrap;
 }
 
 .copy-phone-btn:hover {
   opacity: 0.95;
   transform: translateY(-1px);
+}
+
+.copy-phone-btn.copied {
+  background: rgba(34, 197, 94, 0.16);
+  border-color: rgba(34, 197, 94, 0.4);
+  color: #bbf7d0;
 }
 
 .pagination {
