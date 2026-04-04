@@ -106,7 +106,7 @@ function buildZaloLink(phone) {
   return `https://zalo.me/${normalizedPhone}`;
 }
 
-async function copyPhoneNumber(phone) {
+async function copyPhoneNumber(phone, buttonElement) {
   const normalizedPhone = String(phone || "").trim().replace(/\D/g, "");
 
   try {
@@ -121,10 +121,29 @@ async function copyPhoneNumber(phone) {
       document.body.removeChild(tempInput);
     }
 
-    alert(`Đã sao chép số điện thoại: ${normalizedPhone}`);
+    if (buttonElement) {
+      const originalText = buttonElement.dataset.originalText || "Copy";
+      buttonElement.dataset.originalText = originalText;
+      buttonElement.textContent = "Đã copy";
+      buttonElement.classList.add("copied");
+
+      clearTimeout(buttonElement._copyTimer);
+      buttonElement._copyTimer = setTimeout(() => {
+        buttonElement.textContent = originalText;
+        buttonElement.classList.remove("copied");
+      }, 1500);
+    }
   } catch (error) {
     console.error("Không sao chép được số điện thoại:", error);
-    alert("Không thể sao chép số điện thoại trên trình duyệt này.");
+
+    if (buttonElement) {
+      const originalText = buttonElement.dataset.originalText || "Copy";
+      buttonElement.textContent = "Lỗi copy";
+      clearTimeout(buttonElement._copyTimer);
+      buttonElement._copyTimer = setTimeout(() => {
+        buttonElement.textContent = originalText;
+      }, 1500);
+    }
   }
 }
 
@@ -345,8 +364,15 @@ function renderNeedTableRows() {
     <a class="phone-link" href="${escapeHtml(buildZaloLink(item.phone))}" target="_blank" rel="noopener noreferrer">
       ${escapeHtml(item.phone)}
     </a>
-    <button type="button" class="copy-phone-btn" onclick="copyPhoneNumber('${escapeHtml(item.phone)}')">
-      Sao chép số
+    <button
+      type="button"
+      class="copy-phone-btn"
+      data-original-text="Copy"
+      onclick="copyPhoneNumber('${escapeHtml(item.phone)}', this)"
+      title="Sao chép số điện thoại"
+      aria-label="Sao chép số điện thoại"
+    >
+      Copy
     </button>
   </div>
 </td>
@@ -396,8 +422,15 @@ function renderHaveTableRows() {
     <a class="phone-link" href="${escapeHtml(buildZaloLink(item.phone))}" target="_blank" rel="noopener noreferrer">
       ${escapeHtml(item.phone)}
     </a>
-    <button type="button" class="copy-phone-btn" onclick="copyPhoneNumber('${escapeHtml(item.phone)}')">
-      Sao chép số
+    <button
+      type="button"
+      class="copy-phone-btn"
+      data-original-text="Copy"
+      onclick="copyPhoneNumber('${escapeHtml(item.phone)}', this)"
+      title="Sao chép số điện thoại"
+      aria-label="Sao chép số điện thoại"
+    >
+      Copy
     </button>
   </div>
 </td>
