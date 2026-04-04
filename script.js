@@ -32,6 +32,9 @@ const havePageInfo = document.getElementById("havePageInfo");
 const needCooldownNote = document.getElementById("needCooldownNote");
 const haveCooldownNote = document.getElementById("haveCooldownNote");
 
+const needFormAlert = document.getElementById("needFormAlert");
+const haveFormAlert = document.getElementById("haveFormAlert");
+
 let needListCache = [];
 let haveListCache = [];
 
@@ -142,6 +145,7 @@ async function copyPhoneNumber(phone, buttonElement) {
       clearTimeout(buttonElement._copyTimer);
       buttonElement._copyTimer = setTimeout(() => {
         buttonElement.textContent = originalText;
+        buttonElement.classList.remove("copied");
       }, 1500);
     }
   }
@@ -190,6 +194,7 @@ function updateCooldownUI() {
     haveCooldownNote.textContent = "";
     needCooldownNote.classList.remove("is-active");
     haveCooldownNote.classList.remove("is-active");
+    updateRemoveButtonsState();
     return;
   }
 
@@ -200,6 +205,7 @@ function updateCooldownUI() {
   haveCooldownNote.textContent = countdownText;
   needCooldownNote.classList.add("is-active");
   haveCooldownNote.classList.add("is-active");
+  updateRemoveButtonsState();
 }
 
 function startCooldown(durationMs) {
@@ -213,17 +219,105 @@ function ensureCooldownTimer() {
   cooldownTimer = setInterval(updateCooldownUI, 1000);
 }
 
+function getOrCreateFieldErrorElement(field) {
+  let errorEl = field.parentElement.querySelector(".field-error");
+
+  if (!errorEl) {
+    errorEl = document.createElement("div");
+    errorEl.className = "field-error";
+    field.parentElement.appendChild(errorEl);
+  }
+
+  return errorEl;
+}
+
+function setFieldError(field, message) {
+  if (!field) return;
+  field.classList.add("input-error");
+  const errorEl = getOrCreateFieldErrorElement(field);
+  errorEl.textContent = message || "";
+}
+
+function clearFieldError(field) {
+  if (!field) return;
+  field.classList.remove("input-error");
+  const errorEl = field.parentElement.querySelector(".field-error");
+  if (errorEl) errorEl.textContent = "";
+}
+
+function showFormAlert(alertElement, message) {
+  if (!alertElement) return;
+  alertElement.textContent = message || "";
+  alertElement.classList.add("is-active");
+}
+
+function clearFormAlert(alertElement) {
+  if (!alertElement) return;
+  alertElement.textContent = "";
+  alertElement.classList.remove("is-active");
+}
+
+function getOrCreateRowErrorElement(row) {
+  let errorEl = row.querySelector(".mule-row-error");
+
+  if (!errorEl) {
+    errorEl = document.createElement("div");
+    errorEl.className = "mule-row-error";
+    row.appendChild(errorEl);
+  }
+
+  return errorEl;
+}
+
+function setRowError(row, message) {
+  if (!row) return;
+  row.classList.add("has-error");
+  const errorEl = getOrCreateRowErrorElement(row);
+  errorEl.textContent = message || "";
+}
+
+function clearRowError(row) {
+  if (!row) return;
+  row.classList.remove("has-error");
+  const errorEl = row.querySelector(".mule-row-error");
+  if (errorEl) errorEl.textContent = "";
+}
+
+function clearNeedFormErrors() {
+  clearFormAlert(needFormAlert);
+  ["needName", "needPhone", "needItem"].forEach((id) => {
+    clearFieldError(document.getElementById(id));
+  });
+}
+
+function clearHaveFormErrors() {
+  clearFormAlert(haveFormAlert);
+  ["haveName", "havePhone"].forEach((id) => {
+    clearFieldError(document.getElementById(id));
+  });
+
+  getMuleRows().forEach((row) => {
+    clearRowError(row);
+    clearFieldError(row.querySelector(".mule-link-input"));
+    clearFieldError(row.querySelector(".have-type-select"));
+  });
+}
+
+function focusField(field) {
+  if (field) field.focus();
+}
+
 function createMuleRowHtml(disabled = false) {
   return `
     <div class="mule-row">
       <div class="form-group">
         <label>Link Mule chứa đồ</label>
-        <input type="url" class="mule-link-input" placeholder="Dán link Mule ở đây" required />
+        <input type="url" class="mule-link-input" placeholder="Dán link Mule ở đây" />
       </div>
 
       <div class="form-group">
         <label>Loại Mule</label>
-        <select class="have-type-select" required>
+        <select class="have-type-select">
           <option value="">-- Chọn loại Mule --</option>
           <option value="Đồ set xanh">Đồ set xanh</option>
           <option value="Đồ SU - SSU">Đồ SU - SSU</option>
@@ -251,7 +345,10 @@ function updateRemoveButtonsState() {
 
 function addMuleRow() {
   if (getCooldownRemainingMs() > 0) {
-    alert(`Bạn cần chờ ${formatRemainingTime(getCooldownRemainingMs())} nữa mới được thao tác gửi tiếp.`);
+    const message = `Bạn cần chờ ${formatRemainingTime(getCooldownRemainingMs())} nữa mới được thao tác gửi tiếp.`;
+    showFormAlert(haveFormAlert, message);
+    setFieldError(document.getElementById("havePhone"), message);
+    focusField(document.getElementById("havePhone"));
     return;
   }
 
@@ -280,9 +377,7 @@ function collectMuleEntries() {
 function getFilteredNeedList() {
   const keyword = (needSearchInput?.value || "").trim().toLowerCase();
 
-  if (!keyword) {
-    return needListCache;
-  }
+  if (!keyword) return needListCache;
 
   return needListCache.filter((item) =>
     String(item.itemName || "").toLowerCase().includes(keyword)
@@ -292,9 +387,7 @@ function getFilteredNeedList() {
 function getFilteredHaveList() {
   const selectedType = (haveTypeFilter?.value || "").trim();
 
-  if (!selectedType) {
-    return haveListCache;
-  }
+  if (!selectedType) return haveListCache;
 
   return haveListCache.filter(
     (item) => String(item.haveType || "").trim() === selectedType
@@ -317,7 +410,6 @@ function paginateList(list, currentPage, itemsPerPage) {
 
 function updateNeedPagination(totalPages, currentPage) {
   needPageInfo.textContent = `Trang ${currentPage} / ${totalPages}`;
-
   needFirstBtn.disabled = currentPage === 1;
   needPrevBtn.disabled = currentPage === 1;
   needNextBtn.disabled = currentPage === totalPages;
@@ -326,7 +418,6 @@ function updateNeedPagination(totalPages, currentPage) {
 
 function updateHavePagination(totalPages, currentPage) {
   havePageInfo.textContent = `Trang ${currentPage} / ${totalPages}`;
-
   haveFirstBtn.disabled = currentPage === 1;
   havePrevBtn.disabled = currentPage === 1;
   haveNextBtn.disabled = currentPage === totalPages;
@@ -379,7 +470,6 @@ function renderNeedTableRows() {
     `)
     .join("");
 }
-
 
 function renderHaveTableRows() {
   const filteredList = getFilteredHaveList();
@@ -446,8 +536,147 @@ function parseCooldownResult(result) {
     startCooldown(result.remainingSeconds * 1000);
   }
 
-  alert(result.message || "Bạn đang trong thời gian chờ gửi tiếp.");
   return true;
+}
+
+function highlightNeedServerError(message) {
+  showFormAlert(needFormAlert, message);
+
+  if (message.includes("Số điện thoại")) {
+    const field = document.getElementById("needPhone");
+    setFieldError(field, message);
+    focusField(field);
+    return;
+  }
+
+  if (message.includes("Tên đồ cần")) {
+    const field = document.getElementById("needItem");
+    setFieldError(field, message);
+    focusField(field);
+    return;
+  }
+
+  if (message.includes("Họ tên")) {
+    const field = document.getElementById("needName");
+    setFieldError(field, message);
+    focusField(field);
+    return;
+  }
+
+  const field = document.getElementById("needItem");
+  setFieldError(field, message);
+  focusField(field);
+}
+
+function highlightHaveServerError(message, muleEntries = []) {
+  showFormAlert(haveFormAlert, message);
+
+  if (message.includes("Số điện thoại")) {
+    const field = document.getElementById("havePhone");
+    setFieldError(field, message);
+    focusField(field);
+    return;
+  }
+
+  if (message.includes("Tên chủ sở hữu")) {
+    const field = document.getElementById("haveName");
+    setFieldError(field, message);
+    focusField(field);
+    return;
+  }
+
+  const rows = getMuleRows();
+
+  if (!rows.length) return;
+
+  if (message.includes("ít nhất 1 dòng")) {
+    const row = rows[0];
+    const linkInput = row.querySelector(".mule-link-input");
+    const typeSelect = row.querySelector(".have-type-select");
+    setFieldError(linkInput, "Bạn phải nhập Link Mule.");
+    setFieldError(typeSelect, "Bạn phải chọn Loại Mule.");
+    setRowError(row, message);
+    focusField(linkInput);
+    return;
+  }
+
+  if (message.includes("để trống") || message.includes("điền đầy đủ")) {
+    rows.forEach((row) => {
+      const linkInput = row.querySelector(".mule-link-input");
+      const typeSelect = row.querySelector(".have-type-select");
+      const linkValue = linkInput.value.trim();
+      const typeValue = typeSelect.value.trim();
+
+      if (!linkValue || !typeValue) {
+        if (!linkValue) setFieldError(linkInput, "Bạn chưa nhập Link Mule.");
+        if (!typeValue) setFieldError(typeSelect, "Bạn chưa chọn Loại Mule.");
+        setRowError(row, message);
+      }
+    });
+
+    const firstInvalid = rows.find((row) => {
+      const linkInput = row.querySelector(".mule-link-input");
+      const typeSelect = row.querySelector(".have-type-select");
+      return !linkInput.value.trim() || !typeSelect.value.trim();
+    });
+
+    if (firstInvalid) focusField(firstInvalid.querySelector(".mule-link-input"));
+    return;
+  }
+
+  if (message.includes("Link mule chứa đồ hợp lệ")) {
+    rows.forEach((row) => {
+      const linkInput = row.querySelector(".mule-link-input");
+      if (!isValidMxlMuleLink(linkInput.value.trim())) {
+        setFieldError(linkInput, message);
+        setRowError(row, message);
+      }
+    });
+
+    const firstInvalid = rows.find((row) => {
+      const linkInput = row.querySelector(".mule-link-input");
+      return !isValidMxlMuleLink(linkInput.value.trim());
+    });
+
+    if (firstInvalid) focusField(firstInvalid.querySelector(".mule-link-input"));
+    return;
+  }
+
+  if (message.includes("trùng")) {
+    const normalizedBatchLinks = muleEntries.map((entry) => normalizeLink(entry.muleLink));
+    const duplicateSet = new Set();
+    const seen = new Set();
+
+    normalizedBatchLinks.forEach((link) => {
+      if (seen.has(link)) duplicateSet.add(link);
+      seen.add(link);
+    });
+
+    const existingLinkSet = new Set(haveListCache.map((item) => normalizeLink(item.muleLink)));
+
+    rows.forEach((row) => {
+      const linkInput = row.querySelector(".mule-link-input");
+      const normalized = normalizeLink(linkInput.value.trim());
+
+      if (duplicateSet.has(normalized) || existingLinkSet.has(normalized)) {
+        setFieldError(linkInput, message);
+        setRowError(row, message);
+      }
+    });
+
+    const firstInvalid = rows.find((row) => {
+      const linkInput = row.querySelector(".mule-link-input");
+      const normalized = normalizeLink(linkInput.value.trim());
+      return duplicateSet.has(normalized) || existingLinkSet.has(normalized);
+    });
+
+    if (firstInvalid) focusField(firstInvalid.querySelector(".mule-link-input"));
+    return;
+  }
+
+  const firstRow = rows[0];
+  setRowError(firstRow, message);
+  focusField(firstRow.querySelector(".mule-link-input"));
 }
 
 addMuleRowBtn.addEventListener("click", addMuleRow);
@@ -515,6 +744,49 @@ haveLastBtn?.addEventListener("click", function () {
   const totalPages = Math.max(1, Math.ceil(getFilteredHaveList().length / HAVE_ITEMS_PER_PAGE));
   currentHavePage = totalPages;
   renderHaveTableRows();
+});
+
+document.getElementById("needName")?.addEventListener("input", function () {
+  clearFieldError(this);
+  clearFormAlert(needFormAlert);
+});
+
+document.getElementById("needPhone")?.addEventListener("input", function () {
+  clearFieldError(this);
+  clearFormAlert(needFormAlert);
+});
+
+document.getElementById("needItem")?.addEventListener("input", function () {
+  clearFieldError(this);
+  clearFormAlert(needFormAlert);
+});
+
+document.getElementById("haveName")?.addEventListener("input", function () {
+  clearFieldError(this);
+  clearFormAlert(haveFormAlert);
+});
+
+document.getElementById("havePhone")?.addEventListener("input", function () {
+  clearFieldError(this);
+  clearFormAlert(haveFormAlert);
+});
+
+muleRowsContainer.addEventListener("input", function (event) {
+  if (event.target.classList.contains("mule-link-input")) {
+    clearFieldError(event.target);
+    clearFormAlert(haveFormAlert);
+    const row = event.target.closest(".mule-row");
+    if (row) clearRowError(row);
+  }
+});
+
+muleRowsContainer.addEventListener("change", function (event) {
+  if (event.target.classList.contains("have-type-select")) {
+    clearFieldError(event.target);
+    clearFormAlert(haveFormAlert);
+    const row = event.target.closest(".mule-row");
+    if (row) clearRowError(row);
+  }
 });
 
 async function getData(action) {
@@ -608,6 +880,7 @@ async function renderHaveTable() {
 
 needForm.addEventListener("submit", async function (event) {
   event.preventDefault();
+  clearNeedFormErrors();
 
   const submitButton = needForm.querySelector("button[type='submit']");
   submitButton.disabled = true;
@@ -619,42 +892,60 @@ needForm.addEventListener("submit", async function (event) {
   const itemName = document.getElementById("needItem").value.trim();
 
   if (getCooldownRemainingMs() > 0) {
-    alert(`Bạn cần chờ ${formatRemainingTime(getCooldownRemainingMs())} nữa mới được gửi tiếp.`);
+    const message = `Bạn cần chờ ${formatRemainingTime(getCooldownRemainingMs())} nữa mới được gửi tiếp.`;
+    showFormAlert(needFormAlert, message);
+    setFieldError(document.getElementById("needPhone"), message);
+    focusField(document.getElementById("needPhone"));
     submitButton.disabled = false;
     submitButton.textContent = "Nhập thông tin";
     return;
   }
 
   if (!phone) {
-    alert("Bạn chưa nhập Số điện thoại Zalo ở mục cần đồ.");
+    const message = "Bạn chưa nhập Số điện thoại Zalo ở mục cần đồ.";
+    showFormAlert(needFormAlert, message);
+    setFieldError(document.getElementById("needPhone"), message);
+    focusField(document.getElementById("needPhone"));
     submitButton.disabled = false;
     submitButton.textContent = "Nhập thông tin";
     return;
   }
 
   if (!isValidVietnamPhone(phone)) {
-    alert("Số điện thoại Zalo ở mục cần đồ phải là số điện thoại hợp lệ của Việt Nam.");
+    const message = "Số điện thoại Zalo ở mục cần đồ phải là số điện thoại hợp lệ của Việt Nam.";
+    showFormAlert(needFormAlert, message);
+    setFieldError(document.getElementById("needPhone"), message);
+    focusField(document.getElementById("needPhone"));
     submitButton.disabled = false;
     submitButton.textContent = "Nhập thông tin";
     return;
   }
 
   if (rawName && !isMeaningfulText(rawName, 2)) {
-    alert("Họ tên người cần quá ngắn hoặc có dấu hiệu là ký tự rác.");
+    const message = "Họ tên người cần quá ngắn hoặc có dấu hiệu là ký tự rác.";
+    showFormAlert(needFormAlert, message);
+    setFieldError(document.getElementById("needName"), message);
+    focusField(document.getElementById("needName"));
     submitButton.disabled = false;
     submitButton.textContent = "Nhập thông tin";
     return;
   }
 
   if (!itemName) {
-    alert("Bạn chưa nhập Tên đồ cần.");
+    const message = "Bạn chưa nhập Tên đồ cần.";
+    showFormAlert(needFormAlert, message);
+    setFieldError(document.getElementById("needItem"), message);
+    focusField(document.getElementById("needItem"));
     submitButton.disabled = false;
     submitButton.textContent = "Nhập thông tin";
     return;
   }
 
   if (!isMeaningfulText(itemName, 2)) {
-    alert("Tên đồ cần quá ngắn hoặc có dấu hiệu là ký tự rác.");
+    const message = "Tên đồ cần quá ngắn hoặc có dấu hiệu là ký tự rác.";
+    showFormAlert(needFormAlert, message);
+    setFieldError(document.getElementById("needItem"), message);
+    focusField(document.getElementById("needItem"));
     submitButton.disabled = false;
     submitButton.textContent = "Nhập thông tin";
     return;
@@ -672,19 +963,27 @@ needForm.addEventListener("submit", async function (event) {
 
     if (!result.success) {
       if (parseCooldownResult(result)) {
+        const message = result.message || "Bạn đang trong thời gian chờ gửi tiếp.";
+        showFormAlert(needFormAlert, message);
+        setFieldError(document.getElementById("needPhone"), message);
+        focusField(document.getElementById("needPhone"));
         submitButton.textContent = "Nhập thông tin";
         return;
       }
-      throw new Error(result.message || "Không thể gửi dữ liệu");
+
+      highlightNeedServerError(result.message || "Không thể gửi dữ liệu");
+      submitButton.textContent = "Nhập thông tin";
+      submitButton.disabled = false;
+      return;
     }
 
     needForm.reset();
+    clearNeedFormErrors();
     startCooldown(COOLDOWN_MS);
     await renderNeedTable();
-    alert("Đã gửi thông tin cần đồ thành công.");
   } catch (error) {
     console.error("Lỗi gửi needForm:", error);
-    alert("Gửi dữ liệu thất bại ở mục cần đồ: " + error.message);
+    highlightNeedServerError("Gửi dữ liệu thất bại ở mục cần đồ: " + error.message);
   } finally {
     submitButton.disabled = getCooldownRemainingMs() > 0;
     submitButton.textContent = "Nhập thông tin";
@@ -694,6 +993,7 @@ needForm.addEventListener("submit", async function (event) {
 
 haveForm.addEventListener("submit", async function (event) {
   event.preventDefault();
+  clearHaveFormErrors();
 
   const submitButton = haveForm.querySelector("button[type='submit']");
   submitButton.disabled = true;
@@ -705,68 +1005,75 @@ haveForm.addEventListener("submit", async function (event) {
   const muleEntries = collectMuleEntries();
 
   if (getCooldownRemainingMs() > 0) {
-    alert(`Bạn cần chờ ${formatRemainingTime(getCooldownRemainingMs())} nữa mới được gửi tiếp.`);
+    const message = `Bạn cần chờ ${formatRemainingTime(getCooldownRemainingMs())} nữa mới được gửi tiếp.`;
+    showFormAlert(haveFormAlert, message);
+    setFieldError(document.getElementById("havePhone"), message);
+    focusField(document.getElementById("havePhone"));
     submitButton.disabled = false;
     submitButton.textContent = "Nhập thông tin Mule";
     return;
   }
 
   if (!phone) {
-    alert("Bạn chưa nhập Số điện thoại Zalo ở mục có đồ.");
+    const message = "Bạn chưa nhập Số điện thoại Zalo ở mục có đồ.";
+    showFormAlert(haveFormAlert, message);
+    setFieldError(document.getElementById("havePhone"), message);
+    focusField(document.getElementById("havePhone"));
     submitButton.disabled = false;
     submitButton.textContent = "Nhập thông tin Mule";
     return;
   }
 
   if (!isValidVietnamPhone(phone)) {
-    alert("Số điện thoại Zalo ở mục có đồ phải là số điện thoại hợp lệ của Việt Nam.");
+    const message = "Số điện thoại Zalo ở mục có đồ phải là số điện thoại hợp lệ của Việt Nam.";
+    showFormAlert(haveFormAlert, message);
+    setFieldError(document.getElementById("havePhone"), message);
+    focusField(document.getElementById("havePhone"));
     submitButton.disabled = false;
     submitButton.textContent = "Nhập thông tin Mule";
     return;
   }
 
   if (rawName && !isMeaningfulText(rawName, 2)) {
-    alert("Tên chủ sở hữu quá ngắn hoặc có dấu hiệu là ký tự rác.");
+    const message = "Tên chủ sở hữu quá ngắn hoặc có dấu hiệu là ký tự rác.";
+    showFormAlert(haveFormAlert, message);
+    setFieldError(document.getElementById("haveName"), message);
+    focusField(document.getElementById("haveName"));
     submitButton.disabled = false;
     submitButton.textContent = "Nhập thông tin Mule";
     return;
   }
 
   if (!muleEntries.length) {
-    alert("Bạn phải nhập ít nhất 1 dòng gồm Link Mule và Loại Mule.");
+    const message = "Bạn phải nhập ít nhất 1 dòng gồm Link Mule và Loại Mule.";
+    highlightHaveServerError(message, muleEntries);
     submitButton.disabled = false;
     submitButton.textContent = "Nhập thông tin Mule";
     return;
   }
 
-  const hasCompletelyEmptyRows = muleEntries.some(
-    (entry) => !entry.muleLink && !entry.haveType
-  );
-
+  const hasCompletelyEmptyRows = muleEntries.some((entry) => !entry.muleLink && !entry.haveType);
   if (hasCompletelyEmptyRows) {
-    alert("Có dòng Mule đang để trống. Bạn hãy điền đầy đủ hoặc xóa dòng đó đi.");
+    const message = "Có dòng Mule đang để trống. Bạn hãy điền đầy đủ hoặc xóa dòng đó đi.";
+    highlightHaveServerError(message, muleEntries);
     submitButton.disabled = false;
     submitButton.textContent = "Nhập thông tin Mule";
     return;
   }
 
-  const hasInvalidRow = muleEntries.some(
-    (entry) => !entry.muleLink || !entry.haveType
-  );
-
+  const hasInvalidRow = muleEntries.some((entry) => !entry.muleLink || !entry.haveType);
   if (hasInvalidRow) {
-    alert("Mỗi dòng Mule phải điền đầy đủ Link Mule và Loại Mule, hoặc xóa dòng đó đi.");
+    const message = "Mỗi dòng Mule phải điền đầy đủ Link Mule và Loại Mule, hoặc xóa dòng đó đi.";
+    highlightHaveServerError(message, muleEntries);
     submitButton.disabled = false;
     submitButton.textContent = "Nhập thông tin Mule";
     return;
   }
 
-  const hasInvalidMxlLink = muleEntries.some(
-    (entry) => !isValidMxlMuleLink(entry.muleLink)
-  );
-
+  const hasInvalidMxlLink = muleEntries.some((entry) => !isValidMxlMuleLink(entry.muleLink));
   if (hasInvalidMxlLink) {
-    alert('Đường link không phải Link mule chứa đồ hợp lệ. Link hợp lệ phải bắt đầu bằng "https://median-xl.com/char/" hoặc "https://median-xl.com/acc/" hoặc "https://tsw.vn.cz/char".');
+    const message = 'Đường link không phải Link mule chứa đồ hợp lệ. Link hợp lệ phải bắt đầu bằng "https://median-xl.com/char/" hoặc "https://median-xl.com/acc/" hoặc "https://tsw.vn.cz/char".';
+    highlightHaveServerError(message, muleEntries);
     submitButton.disabled = false;
     submitButton.textContent = "Nhập thông tin Mule";
     return;
@@ -776,20 +1083,19 @@ haveForm.addEventListener("submit", async function (event) {
   const batchLinkSet = new Set(normalizedBatchLinks);
 
   if (batchLinkSet.size !== normalizedBatchLinks.length) {
-    alert("Trong một lần nhập đang có link Mule bị trùng nhau. Bạn hãy xóa link trùng rồi gửi lại.");
+    const message = "Trong một lần nhập đang có link Mule bị trùng nhau. Bạn hãy xóa link trùng rồi gửi lại.";
+    highlightHaveServerError(message, muleEntries);
     submitButton.disabled = false;
     submitButton.textContent = "Nhập thông tin Mule";
     return;
   }
 
-  const existingLinkSet = new Set(
-    haveListCache.map((item) => normalizeLink(item.muleLink))
-  );
-
+  const existingLinkSet = new Set(haveListCache.map((item) => normalizeLink(item.muleLink)));
   const hasExistingDuplicate = normalizedBatchLinks.some((link) => existingLinkSet.has(link));
 
   if (hasExistingDuplicate) {
-    alert("Đã tồn tại link Mule trùng trong bảng tổng hợp chung. Bạn không thể nhập lại link đã có.");
+    const message = "Đã tồn tại link Mule trùng trong bảng tổng hợp chung. Bạn không thể nhập lại link đã có.";
+    highlightHaveServerError(message, muleEntries);
     submitButton.disabled = false;
     submitButton.textContent = "Nhập thông tin Mule";
     return;
@@ -809,20 +1115,28 @@ haveForm.addEventListener("submit", async function (event) {
 
     if (!result.success) {
       if (parseCooldownResult(result)) {
+        const message = result.message || "Bạn đang trong thời gian chờ gửi tiếp.";
+        showFormAlert(haveFormAlert, message);
+        setFieldError(document.getElementById("havePhone"), message);
+        focusField(document.getElementById("havePhone"));
         submitButton.textContent = "Nhập thông tin Mule";
         return;
       }
-      throw new Error(result.message || "Không thể gửi dữ liệu");
+
+      highlightHaveServerError(result.message || "Không thể gửi dữ liệu", muleEntries);
+      submitButton.textContent = "Nhập thông tin Mule";
+      submitButton.disabled = false;
+      return;
     }
 
     haveForm.reset();
     resetMuleRows();
+    clearHaveFormErrors();
     startCooldown(COOLDOWN_MS);
     await renderHaveTable();
-    alert("Đã gửi thông tin có đồ thành công.");
   } catch (error) {
     console.error("Lỗi gửi haveForm:", error);
-    alert("Gửi dữ liệu thất bại ở mục có đồ: " + error.message);
+    highlightHaveServerError("Gửi dữ liệu thất bại ở mục có đồ: " + error.message, muleEntries);
   } finally {
     submitButton.disabled = getCooldownRemainingMs() > 0;
     submitButton.textContent = "Nhập thông tin Mule";
